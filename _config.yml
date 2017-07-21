@@ -7,16 +7,16 @@
 
 # Site Settings
 locale                   : "en"
-title                    : "Site Title"
+title                    : "The Shell Nut"
 title_separator          : "-"
-name                     : "Your Name"
-description              : "An amazing website."
-url                      : # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+name                     : &authorName "Mathieu Buisson"
+description              : "PowerShell, Automation, DevOps ..."
+url                      : "https://mathieubuisson.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
-repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
+repository               : "MathieuBuisson/MathieuBuisson.github.io"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
-words_per_minute         : 200
+words_per_minute         : 180
 comments:
   provider               : # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "custom"
   disqus:
@@ -26,7 +26,7 @@ comments:
   facebook:
     # https://developers.facebook.com/docs/plugins/comments
     appid                :
-    num_posts            : # 5 (default)
+    num_posts            : #
     colorscheme          : # "light" (default), "dark"
 staticman:
   allowedFields          : ['name', 'email', 'url', 'message']
@@ -55,7 +55,7 @@ yandex_site_verification :
 
 # Social Sharing
 twitter:
-  username               :
+  username               : "TheShellNut"
 facebook:
   username               :
   app_id                 :
@@ -66,7 +66,10 @@ og_image                 : # Open Graph/Twitter default site image
 social:
   type                   : # Person or Organization (defaults to Person)
   name                   : # If the user or organization name differs from the site's name
-  links: # An array of links to social media profiles
+  links: 
+    - "https://twitter.com/TheShellNut"
+    - "https://github.com/MathieuBuisson"
+    - "https://www.linkedin.com/in/mathieubuisson"
 
 # Analytics
 analytics:
@@ -77,10 +80,10 @@ analytics:
 
 # Site Author
 author:
-  name             : "Your Name"
+  name             : *authorName
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "I am an amazing person."
-  location         : "Somewhere"
+  bio              : "Automation partisan | PowerShell artisan | Continuous deployer | Perpetual learner | Senior DevOps Engineer @OneviewHC"
+  location         : "Ireland"
   email            :
   uri              :
   bitbucket        :
@@ -89,24 +92,23 @@ author:
   flickr           :
   facebook         :
   foursquare       :
-  github           :
+  github           : "MathieuBuisson"
   gitlab           :
   google_plus      :
   keybase          :
   instagram        :
   lastfm           :
-  linkedin         :
+  linkedin         : "mathieubuisson"
   pinterest        :
   soundcloud       :
   stackoverflow    : # "123456/username" (the last part of your profile url, e.g. http://stackoverflow.com/users/123456/username)
   steam            :
   tumblr           :
-  twitter          :
+  twitter          : "TheShellNut"
   vine             :
   weibo            :
   xing             :
   youtube          : # "https://youtube.com/c/MichaelRoseDesign"
-
 
 # Reading Files
 include:
@@ -173,7 +175,7 @@ sass:
 
 # Outputting
 permalink: /:categories/:title/
-paginate: 5 # amount of posts to show
+paginate: 7 # amount of posts to show
 paginate_path: /page:num/
 timezone: # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
@@ -225,7 +227,6 @@ tag_archive:
 
 
 # HTML Compression
-# - http://jch.penibelst.de/
 compress_html:
   clippings: all
   ignore:
