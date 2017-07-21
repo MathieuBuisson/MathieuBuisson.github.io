@@ -16,7 +16,7 @@ en: &DEFAULT_EN
   share_on_label             : "Share on"
   meta_label                 :
   tags_label                 : "Tags:"
-  categories_label           : "Categories:"
+  categories_label           :
   date_label                 : "Updated:"
   comments_label             : "Leave a Comment"
   comments_title             : "Comments"
@@ -35,7 +35,7 @@ en: &DEFAULT_EN
   comment_form_name_label    : "Name"
   comment_form_email_label   : "Email address"
   comment_form_website_label : "Website (optional)"
-  comment_btn_submit         : "Submit Comment"
+  comment_btn_submit         : "Submit"
   comment_btn_submitted      : "Submitted"
   comment_success_msg        : "Thanks for your comment! It will show on the site once it has been approved."
   comment_error_msg          : "Sorry, there was an error with your submission. Please make sure all required fields have been completed and try again."
