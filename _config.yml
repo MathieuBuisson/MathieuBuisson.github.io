@@ -1,6 +1,6 @@
 # Site Settings
 locale                   : "en"
-title                    : "The Shell Nut"
+title                    : "TheShellNut"
 title_separator          : "-"
 name                     : &authorName "Mathieu Buisson"
 description              : "PowerShell, Automation, DevOps ..."
@@ -168,7 +168,7 @@ sass:
 
 # Outputting
 permalink: /:categories/:title/
-paginate: 7 # amount of posts to show
+paginate: 10 # amount of posts to show
 paginate_path: /page:num/
 timezone: Europe/Dublin
 
@@ -229,7 +229,8 @@ compress_html:
 # Defaults
 defaults:
   # _posts
-  - scope:
+  -
+    scope:
       path: ""
       type: posts
     values:
@@ -239,3 +240,18 @@ defaults:
       comments: # true
       share: true
       related: true
+  -
+    scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      author_profile: true
+
+# post with future date won't show
+future: false
+
+# For development purposes only !
+webrick:
+  headers:
+    Access-Control-Allow-Origin: "*"
