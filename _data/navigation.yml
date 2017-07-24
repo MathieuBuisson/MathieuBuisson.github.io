@@ -2,9 +2,7 @@
 main:
   - title: "Archives"
     url: /year-archive/
-  - title: "PowerShell Resources"
-    url: /powershell-resources/
-  - title: "DevOps Resources"
-    url: /devops-resources/
+  - title: "Resources"
+    url: /resources/
   - title: "About Me"
     url: /about/
