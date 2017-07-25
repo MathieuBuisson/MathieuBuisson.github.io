@@ -1,6 +1,8 @@
 ---
 title: "PowerShell Resources"
 permalink: /powershell-resources/
+tags: 
+  - PowerShell
 ---
 
 ## Video trainings  
