@@ -5,11 +5,14 @@ permalink: /about/
 
 ## About TheShellNut  
  
-I spend a lot of time in shells (mostly [PowerShell](https://github.com/PowerShell/PowerShell)) and IDEs (mostly [VSCode](https://code.visualstudio.com/)).  
-I like experimenting, <del>breaking</del> <ins>automating</ins> things, building tools to deepen or expand my knowledge and skills.  
+I like experimenting, exploring technologies, automating things, <del>breaking</del> <ins>building</ins> tools to expand my knowledge and skills.  
 
 The main purpose of this blog is to document the results of my experimentations.  
 Documenting this in the form of blog posts allows me to retrieve and share this information easily.  
+
+Where does the name "**TheShellNut**" come from ?  
+It is a vestige from my previous blog : **theshellnut.com**.   
+At that time, the content was pretty much all about shells (PowerShell and bash) and I thought "shell nut" was a nice pun.
 
 ## About Mathieu Buisson   
 
