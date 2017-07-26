@@ -43,10 +43,43 @@ Very basically, it consists in (among other things) putting engineers with a sof
 Sounds scary ? Well, not every company can really do this because not every company is **Google**.  
 But still, this is a fascinating read and the underlying principles are definitely inspiring.  
 
+#### [The Release Pipeline Model Whitepaper](http://aka.ms/thereleasepipelinemodelpdf) :  
+This 43 pages whitepaper is a very approachable, high-level view of modern release management.  
+It covers the key components and benefits of an automated delivery pipeline for software or IT services :
+  - Source control  
+  - Builds  
+  - Infrastructure-as-Code to manage environments  
+  - Testing  
+  - Deployment  
+  - Operations
+
+I should probably mention : this is a Microsoft-sponsored whitepaper so it is definitely Microsoft-centric.  
+
 ## Blogs/Sites
 
-#### 
+#### [DZone](https://dzone.com/)  
+
+#### [DevOps.com](https://devops.com/)  
+
+#### [Microsoft DevOps Blog](https://blogs.msdn.microsoft.com/devops/)  
+
+#### [TechBeacon - DevOps](https://techbeacon.com/devops)  
+
+#### [SRE Weekly](https://sreweekly.com/)  
+
+#### [Jenkins Community Blog](https://jenkins.io/node/)  
+
+#### [Please Release Me](https://pleasereleaseme.net/)  
+
+#### [Can You DevOp With Windows?](https://stevenmurawski.com/)  
+
+#### [Benjamin Day Consulting Blog](https://www.benday.com/blog/)  
+
+#### [i-py.com](https://i-py.com/)  
 
 ## Conferences  
 
-#### 
+#### WinOps :  
+If you are <em>"doing the DevOps"</em> in a Microsoft-centric world, then this is the conference to attend.  
+Lots of great sessions and the speaker lineup is prestigious. To give you a quick idea, last year's keynote speaker was **Jeffrey Snover**.  
+Here are the [session recordings from the 2016 edition](https://www.youtube.com/playlist?list=PLh-Ebab4Y6Lh09SnM63euerPW0-pauO7k).  
