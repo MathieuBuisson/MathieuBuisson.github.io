@@ -61,6 +61,18 @@
     font-size: 0.93em;
   }
 
+  /* links to archives */
+  li {
+    h3 {
+        margin: 0.25em 0 0.8em;
+      a {
+        font-size: 1.15em;
+        font-family: $header-font-family;
+        font-weight: bold;
+      }
+    }
+  }
+
   /* paragraph indents */
   p {
     margin: 0 0 $indent-var;

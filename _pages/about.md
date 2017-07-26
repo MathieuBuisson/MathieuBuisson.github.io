@@ -11,7 +11,7 @@ The main purpose of this blog is to document the results of my experimentations.
 Documenting this in the form of blog posts allows me to retrieve and share this information easily.  
 
 Where does the name "**TheShellNut**" come from ?  
-It is a vestige from my previous blog : **theshellnut.com**.   
+It is a vestige from the previous incarnation of this blog : **theshellnut.com**.   
 At that time, the content was pretty much all about shells (PowerShell and bash) and I thought "shell nut" was a nice pun.
 
 ## About Mathieu Buisson   
