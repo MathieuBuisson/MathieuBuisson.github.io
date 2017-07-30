@@ -1,6 +1,6 @@
 ---
 layout: archive
-permalink: /posts-by-tags/
+permalink: /tags/
 title: "Posts by Topic"
 ---
 
