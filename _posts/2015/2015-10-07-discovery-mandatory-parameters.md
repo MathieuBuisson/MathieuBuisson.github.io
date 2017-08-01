@@ -154,7 +154,7 @@ Now, there are 2 more properties we want to add to our parameter object :
 To this end, we are going to use another invaluable discoverability tool : `Get-Help`.
 
 ```powershell
-PS C:\> Get-Help $CmdString -Parameter $MandatoryParameters[0].Name
+C:\> Get-Help $CmdString -Parameter $MandatoryParameters[0].Name
 
 -FilePath <String>
     Specifies a script that the scheduled job runs. Enter the path to a .ps1 file on the 

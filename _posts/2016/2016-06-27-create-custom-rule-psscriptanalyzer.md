@@ -134,71 +134,72 @@ Our predicate should take input (pieces of PowerShell code) via a parameter. Her
                 ...
 ```
 
-Our rule for PascalCasing relates only to variable names, so we first need to identify variables. What is most relevant for naming is when variables are defined, or assigned a value, not really when they are referenced. So the arguably best way to identify variables for our particular purpose is to identify variable assignments, like so :
+Our rule for PascalCasing relates only to variable names, so we first need to identify variables. What is most relevant for naming is when variables are defined, or assigned a value, not really when they are referenced.  
+So the arguably best way to identify variables for our particular purpose is to identify variable assignments, like so :
 
-[powershell gutter="true"]
+```powershell
 If ($Ast -is [System.Management.Automation.Language.AssignmentStatementAst]) {
-
     ...
-[/powershell]
-&nbsp;
-Next, we need to identify any variable names which don't follow PascalCasing. For that, we'll use the comparison operator **<code>-cnotmatch</code>** and a regex. As you probably know, PowerShell is not case sensitive. But our rule is all about casing, **it is case hypersensitive**. This makes the "c" in **<code>-cnotmatch</code>** crucial for our predicate to work :
+}
+```
 
-[powershell gutter="true"]
+Next, we need to identify any variable names which don't follow PascalCasing.  
+
+For that, we'll use the comparison operator `-cnotmatch` and a regex. As you probably know, PowerShell is not case sensitive. But our rule is all about casing, it is case *hypersensitive*. This makes the "c" in `-cnotmatch` crucial for our predicate :
+
+```powershell
 [System.Management.Automation.Language.AssignmentStatementAst]$VariableAst = $Ast
     If ($VariableAst.Left.VariablePath.UserPath -cnotmatch '^([A-Z][a-z]+)+$') {
         $ReturnValue = $True
     }
-[/powershell]
-&nbsp;
-To extract only the variable names from our variable assignment objects, we take their "**Left**" property (what's on the left side of the assignment operator), then the "**VariablePath**" property and then the "**UserPath**" nested property. This gives us only the variable name as a [string]. If that string doesn't match our regular expression, the predicate returns **$True**, which means there is a violation.
+```
 
-A brief explanation of the regex used above **<code>([A-Z][a-z]+) </code>**:
-this means one upper case letter followed by one or more lower case letter(s). This particular pattern can be repeated so we put it between parenthesis and append a "+". And all this should strictly between the beginning of the string "^" and the end of the string "$".
+To extract only the variable names from our variable assignment objects, we take their `Left` property (the left side of the assignment operator), then the `VariablePath` property and then the `UserPath` nested property.  
+This gives us the variable name as a `[string]`. If that string doesn't match our regular expression, the predicate returns `$True`.
 
-Off course, this detection method is limited because there is no intelligence to detect words of the English language (or any language) which may be concatenated to form the variable name :
+Off course, this detection method is limited because there is no intelligence to detect words of the English language (or any language) :
 
-[powershell gutter="true"]
-PS C:\> 'FirstwordSecondword' -cmatch '^([A-Z][a-z]+)+$'
+```powershell
+C:\> 'FirstwordSecondword' -cmatch '^([A-Z][a-z]+)+$'
 True
-
-PS C:\> 'FirstwoRdsecoNdword' -cmatch '^([A-Z][a-z]+)+$'
+C:\> 'FirstwoRdsecoNdword' -cmatch '^([A-Z][a-z]+)+$'
 True
-[/powershell]
-&nbsp;
+```
+
 Also, I'm not a big fan of using digits in variable names but if you want the rule to allow that, you can use the following regex :
 
-[powershell gutter="true"]
-PS C:\> 'Word1Word2' -cmatch '^([A-Z]\w+)+$'
+```powershell
+C:\> 'Word1Word2' -cmatch '^([A-Z]\w+)+$'
 True
-[/powershell]
-&nbsp;
-<h2>Using the predicate to detect violations</h2>
+```
 
-Now, we can use our predicate against whatever PowerShell code is fed to our **Measure-PascalCase** function via its **$ScriptBlockAst** parameter. The input PowerShell code is an object of the type **<code>[System.Management.Automation.Language.ScriptBlockAst]</code>**, so like most AST objects, it has a **FindAll()** method which we can use to find all the elements within that object which match a predicate.
+## Using the predicate to detect violations
 
-[powershell]
-[System.Management.Automation.Language.Ast[]]$Violations = $ScriptBlockAst.FindAll($Predicate, $True)
-[/powershell]
-&nbsp;
-The second parameter of the **FindAll()** method ($True) tells it to search recursively in nested elements.
+Now, we can use our predicate against whatever PowerShell code is fed to our `Measure-PascalCase` function via its `$ScriptBlockAst` parameter.  
 
-Now, for any violation of our rule, we need to create an object of the type **<code>[Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord]</code>**, because `PSScriptAnalyzer` expects our function to return an array of object(s) of that specific type :
+The input PowerShell code is a `[System.Management.Automation.Language.ScriptBlockAst]`, so like most AST objects, it has a `FindAll` method which we can use to find all the elements within that object which match a predicate.
 
-[powershell gutter="true"]
+```powershell
+[System.Management.Automation.Language.Ast[]]$Violations = $ScriptBlockAst.FindAll($Predicate,$True)
+```
+
+The second parameter of the `FindAll` method tells it to search recursively in nested elements.
+
+Now, for any violation of our rule, we need to create an object of the type `[Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord]`, because `PSScriptAnalyzer` expects our function to return an array of object(s) of that specific type :
+
+```powershell
 Foreach ($Violation in $Violations) {
 
     $Result = New-Object `
             -Typename 'Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord' `
-            -ArgumentList '$((Get-Help $MyInvocation.MyCommand.Name).Description.Text)',$Violation.Extent,$PSCmdlet.MyInvocation.InvocationName,Information,$Null
-          
+            -ArgumentList '$((Get-Help $MyInvocation.MyCommand.Name).Description.Text)',$Violation.Extent,$PSCmdlet.MyInvocation.InvocationName,Information,$Null          
     $Results += $Result
 }
-[/powershell]
-&nbsp;
-Pay particular attention to the 5 values passed to the **-ArgumentList** parameter of the cmdlet **<code>New-Object</code>**. To see what each of these values correspond to, we can have a look at the constructor(s) for this class :
+```
 
-[powershell gutter="true"]
+Pay particular attention to the 5 values passed to the `ArgumentList` parameter of the cmdlet `New-Object`. To see what each of these values correspond to, we can have a look at the constructor(s) for this class :
+
+```powershell
 C:\> [Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord]::new
 
 OverloadDefinitions
@@ -207,27 +208,26 @@ Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord new()
 Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord new(string message,
 System.Management.Automation.Language.IScriptExtent extent, string ruleName,
 Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticSeverity severity, string scriptName, string ruleId)
-[/powershell]
-&nbsp;
-For the "**Message**" property of our **<code>[DiagnosticRecord]</code>** objects, hard-coding a relatively long message would not look nice, so here, we are reusing our carefully crafted description from the comment-based help. We don't have to do this, but that way, we don't reinvent the wheel. 
+```
 
-Then, each resulting object is added to an array : **$Results**.
+For the `Message` property of our `[DiagnosticRecord]` objects, hard-coding a relatively long message would not look nice, so here, we are reusing our carefully crafted description from the comment-based help.  
+
+Then, each resulting object is added to an array : `$Results`.
 Finally, when we are done processing violations, we return that array for `PSScriptAnalyzer`'s consumption :
 
-[powershell gutter="true"]
-            }
+```powershell
             return $Results
             #endregion
-        }
-[/powershell]
-&nbsp;
-That's it. The module containing the full function is on <a href="https://github.com/MathieuBuisson/PowerShell-DevOps/blob/master/CustomPSScriptAnalyzerRules/MBAnalyzerRules.psm1">this GitHub page</a>.
+```
 
-Now, let's use our custom rule with `PSScriptAnalyzer` against an example script :
+That's it.  
+The module containing the full function is on [GitHub](https://github.com/MathieuBuisson/PowerShell-DevOps/blob/master/CustomPSScriptAnalyzerRules/MBAnalyzerRules.psm1).
 
-[powershell gutter="true"]
-C:\> Invoke-ScriptAnalyzer -Path .\ExampleScript.ps1 -CustomRulePath .\MBAnalyzerRules.psm1 |
- Select-Object RuleName, Line, Message | Format-Table -AutoSize -Wrap
+## Using the custom rule with PPScriptAnalyzer
+
+```powershell
+C:\> Invoke-ScriptAnalyzer -Path '.\ExampleScript.ps1' -CustomRulePath '.\MBAnalyzerRules.psm1' |
+>> Select-Object 'RuleName', 'Line', 'Message' | Format-Table -AutoSize -Wrap
 
 RuleName                           Line Message
 --------                           ---- -------
@@ -243,22 +243,15 @@ MBAnalyzerRules\Measure-PascalCase   28 Variable names should use a consistent c
                                         concatenated word is capitalized.
                                         To fix a violation of this rule, please consider using PascalCase for variable
                                         names.
-MBAnalyzerRules\Measure-PascalCase   86 Variable names should use a consistent capitalization style, i.e. : PascalCase.
-                                        In PascalCase, only the first letter is capitalized. Or, if the variable name
-                                        is made of multiple concatenated words, only the first letter of each
-                                        concatenated word is capitalized.
-                                        To fix a violation of this rule, please consider using PascalCase for variable
-                                        names.
-MBAnalyzerRules\Measure-PascalCase   88 Variable names should use a consistent capitalization style, i.e. : PascalCase.
-                                        In PascalCase, only the first letter is capitalized. Or, if the variable name
-                                        is made of multiple concatenated words, only the first letter of each
-                                        concatenated word is capitalized.
-                                        To fix a violation of this rule, please consider using PascalCase for variable
-                                        names.
-[/powershell]
-&nbsp;
+```
+
 That's cool, but we probably want to see the actual variable names which are not following our desired capitalization style. We can obtain this information like so :
 
-<a href="http://theshellnut.com/wp-content/uploads/2016/06/VariableNames2.png"><img src="http://theshellnut.com/wp-content/uploads/2016/06/VariableNames2.png" alt="VariableNames" width="984" height="154" class="alignnone size-full wp-image-705" /></a>
-&nbsp;
-We can see that in the case of this script (pun intended), the case of variable names is all over the place, and we can easily go and fix it.
+```powershell
+C:\> $Violations = Invoke-ScriptAnalyzer -Path '.\ExampleScript.ps1' -CustomRulePath '.\MBAnalyzerRules.psm1'
+C:\> Violations.Extent.Text | Foreach-Object { ($_ -split ' = ')[0] }
+$statusUrl
+$NAMESPACE
+```
+
+We can see that in the *case* of this script (pun intended), 2 variable names don't conform to our standard. Now, we can easily go and fix them.

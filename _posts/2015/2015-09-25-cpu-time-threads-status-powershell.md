@@ -175,7 +175,7 @@ Function Get-ProcessThreadsInfo {
 The output looks like this :
 
 ```powershell
-PS C:\> Get-ProcessThreadsInfo -ID 10080
+C:\> Get-ProcessThreadsInfo -ID 10080
 
 System CPUTime (%) : 57.1
 ThreadID           : 8760

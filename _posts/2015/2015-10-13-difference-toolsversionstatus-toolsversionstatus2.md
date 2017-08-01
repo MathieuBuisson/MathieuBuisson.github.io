@@ -8,8 +8,8 @@ Recently, I had a customer who wanted to check if the VMware Tools were installe
 A relatively easy way to do this is with a VirtualMachine view or the `ExtensionData` of a VM object :
 
 ```powershell
-PS C:\> $VMView = Get-VM -Name Test-VM | Get-View
-PS C:\> $VMView.Summary.Guest
+C:\> $VMView = Get-VM -Name Test-VM | Get-View
+C:\> $VMView.Summary.Guest
 
 GuestId             :
 GuestFullName       :
@@ -36,7 +36,7 @@ But searching in the vSphere API reference is kind of a <em>needle in the haysta
 The .NET method `GetType` is generally good at telling us the exact type of the object we are dealing with, so let's use it :
 
 ```powershell
-PS C:\> $VMView.Summary.Guest.GetType()
+C:\> $VMView.Summary.Guest.GetType()
 
 IsPublic IsSerial Name                                     BaseType
 -------- -------- ----                                     --------
@@ -63,7 +63,7 @@ This leads more questions :
 It is pretty simple because we already have a VirtualMachine view `$VMView` and PowerCLI views have a property named `Version` which is nested in `Client` and provides the API version for the current view :
 
 ```powershell
-PS C:\> $VMView.Client
+C:\> $VMView.Client
 
 Version          : Vim55
 VimService       : VimApi_55.VimService

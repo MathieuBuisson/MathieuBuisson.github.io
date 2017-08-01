@@ -146,7 +146,7 @@ For that, we need to use another mechanism called : **cross-node dependency**. T
 
 
 ```powershell
-PS C:\> Get-DscResource -Name 'WaitFor*' -Syntax
+C:\> Get-DscResource -Name 'WaitFor*' -Syntax
 WaitForAll [String] #ResourceName
 {
     NodeName = [string[]]
@@ -258,7 +258,7 @@ To make this happen smoothly, we can use `PsDscRunAsCredential` within our `Wait
 `$Credential` is a parameter of our configuration, so we are going to specify the credentials when calling the configuration. Let's do it :
 
 ```powershell
-PS C:\> UpdateWebSite -ConfigurationData $DevEnvironment -OutputPath 'C:\Conf\UpdateWebSite' -Credential (Get-Credential)
+C:\> UpdateWebSite -ConfigurationData $DevEnvironment -OutputPath 'C:\Conf\UpdateWebSite' -Credential (Get-Credential)
 
 cmdlet Get-Credential at command pipeline position 1
 Supply values for the following parameters:

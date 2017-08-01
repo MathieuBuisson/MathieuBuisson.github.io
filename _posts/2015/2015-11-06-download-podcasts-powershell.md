@@ -133,7 +133,7 @@ This allows to add podcast URLs to the file containing your favorite podcasts, w
 It can also create a list of podcasts because if the file specified doesn't exist, it creates it :
 
 ```powershell
-PS C:\> Add-PodcastToList -Url http://feeds.feedburner.com/PowerScripting -List $env:USERPROFILE\Desktop\MyPodcastList.txt
+C:\> Add-PodcastToList -Url http://feeds.feedburner.com/PowerScripting -List $env:USERPROFILE\Desktop\MyPodcastList.txt
 ```
 
 You can also use this cmdlet in combination with `Get-Podcast` to create a new podcast list from an existing list :

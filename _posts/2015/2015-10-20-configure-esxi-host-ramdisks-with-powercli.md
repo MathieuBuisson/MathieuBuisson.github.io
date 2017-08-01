@@ -16,8 +16,8 @@ This corresponds to settings in **System Resource Allocation** :
 Let's see how we can configure this in a more automated way, with PowerCLI.
 
 ```powershell
-PS C:\> $ESXiHosts = Get-VMHost
-PS C:\> $Spec = New-Object VMware.Vim.HostSystemResourceInfo
+C:\> $ESXiHosts = Get-VMHost
+C:\> $Spec = New-Object VMware.Vim.HostSystemResourceInfo
 ```
 
 Here, we save all our ESXi Hosts into a variable for later use, because we want to configure all the ESXi hosts in the vCenter.  
@@ -26,8 +26,8 @@ We also create a new, empty `HostSystemResourceInfo` object, which we are going 
 Now, the tricky part is to use the appropriate key, depending on the RAMdisk we want to configure. This can be one of 3 possible RAMdisks that we might want to configure, so this is a good candidate for a `Switch` statement :  
 
 ```powershell
-PS C:\> $RamDisk = 'tmp'
-PS C:\> switch ($RamDisk) {
+C:\> $RamDisk = 'tmp'
+C:\> switch ($RamDisk) {
     'tmp' {$Spec.Key = "host/system/kernel/kmanaged/visorfs/tmp"}
     'root' {$Spec.Key = "host/system/kernel/kmanaged/visorfs/root"}
     'hostdstats' {$Spec.Key = "host/system/kernel/kmanaged/visorfs/hostdstats"}
@@ -39,8 +39,8 @@ As an example, we are going to configure the `tmp` RAMdisk.
 Then, we create a new, empty `ResourceConfigSpec` object and store it into our Config property :
 
 ```powershell
-PS C:\> $Spec.Config = New-Object VMware.Vim.ResourceConfigSpec
-PS C:\> $Spec.Config
+C:\> $Spec.Config = New-Object VMware.Vim.ResourceConfigSpec
+C:\> $Spec.Config
 
 Entity           :
 ChangeVersion    :
@@ -56,17 +56,17 @@ Even though, the CPU allocation is not applicable to a RAMdisk, we need to creat
 Why ? Because the vSphere API won't let us apply the `ResourceConfigSpec` to a host, if the `CpuAllocation` or the `MemoryAllocation` property is null.
 
 ```powershell
-PS C:\> $Spec.Config.cpuAllocation = New-Object VMware.Vim.ResourceAllocationInfo
+C:\> $Spec.Config.cpuAllocation = New-Object VMware.Vim.ResourceAllocationInfo
 ```
 
 Now, let's set the memory reservation to 30 MB, the limit to 400 MB and the reservation as expandable.  
 Expandable reservation means that more than the reservation can be allocated to the RAMdisk if there are available resources in the parent resource pool.
 
 ```powershell
-PS C:\> $Spec.Config.memoryAllocation = New-Object VMware.Vim.ResourceAllocationInfo
-PS C:\> $Spec.Config.memoryAllocation.Reservation = 30
-PS C:\> $Spec.Config.memoryAllocation.Limit = 400
-PS C:\> $Spec.Config.memoryAllocation.ExpandableReservation = $True
+C:\> $Spec.Config.memoryAllocation = New-Object VMware.Vim.ResourceAllocationInfo
+C:\> $Spec.Config.memoryAllocation.Reservation = 30
+C:\> $Spec.Config.memoryAllocation.Limit = 400
+C:\> $Spec.Config.memoryAllocation.ExpandableReservation = $True
 ```
 
 Now, it's time to apply the configuration to each individual ESXi host :
