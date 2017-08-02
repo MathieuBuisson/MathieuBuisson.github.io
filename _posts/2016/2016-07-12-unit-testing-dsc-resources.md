@@ -212,7 +212,7 @@ This test is validating that the mandatory parameters of `Test-TargetResource` a
 There is a `PSScriptAnalyzer` rule for that, with an `Error` severity, so we can safely assume that this is a widely accepted and important best practice.
 
 Reading the name of this `It` block, we could assume that it is checking against `$True` or `$False`.  
-But here, we use `Compare-Object` and validate that there is no difference between the 2 lists of mandatory parameters. This is to make the test failure message more useful : it will tell us the offending parameter name(s).
+But here, we use `Compare-Object` to validate that there is no difference between the 2 lists of mandatory parameters. This is to make the test failure message more useful : it will tell us the offending parameter name(s).
 
 ```powershell
     It "Should return a boolean" {
@@ -244,9 +244,10 @@ The same as before, but this time we validate that the mandatory parameters of t
 That's it for the script.  
 
 But then, a boilerplate is more useful when it is readily available as a snippet on your IDE of choice.  
-So I also converted this boilerplate into a <strong>Visual Studio Code</strong> snippet, this is the first snippet in the file I made [available here](https://github.com/MathieuBuisson/PowerShell-DevOps/blob/master/VisualStudioCode/PowerShell.json).
+So I made it into a <strong>Visual Studio Code</strong> snippet, this is the first snippet in the file [available here](https://github.com/MathieuBuisson/PowerShell-DevOps/blob/master/VisualStudioCode/PowerShell.json).
 
-The path of <strong>Visual Studio Code</strong> PowerShell snippet file is : %APPDATA%\Code\User\snippets\PowerShell.json.
-Or, for those of us using the PowerShell extension, we can modify the following file : %USERPROFILE%\.vscode\extensions\ms-vscode.PowerShell-0.6.1\snippets\PowerShell.json.
+The snippet file should be store as : `%APPDATA%\Code\User\snippets\PowerShell.json`.  
+Or, for those of us using the PowerShell extension, we can modify the existing file at : `%USERPROFILE%\.vscode\extensions\ms-vscode.PowerShell-0.6.1\snippets\PowerShell.json`.
 
-Obviously, this set of tests is pretty basic and doesn't cover the code written specifically for a given resource, but it's a pretty good starting point. This allows to write basic unit tests for our DSC resources in just a few minutes, so now, there's no excuse for not doing it.
+Obviously, this set of tests is pretty basic and doesn't cover the code written specifically for a given resource, but it's a starting point. This allows to write basic unit tests for our DSC resources in just a few minutes.  
+So now, there's no excuse for not doing it.
