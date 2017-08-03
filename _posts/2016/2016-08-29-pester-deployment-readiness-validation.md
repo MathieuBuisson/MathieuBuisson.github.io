@@ -33,7 +33,7 @@ Knowing that Pester can be used [to validate the operation of a system](https://
 So the result is a PowerShell module named : **DeploymentReadinessChecker**.  
 It is available on the [PowerShell Gallery](https://www.powershellgallery.com/packages/DeploymentReadinessChecker).
 
-## Basic usage :  
+## Basic usage  
 
 The requirements are :  
   - PowerShell 4.0 (or later)  
@@ -98,10 +98,15 @@ Also, its extension should be `.Tests.ps1` because that's what `Invoke-Pester` l
 There is no support for multiple validation scripts, so before adding your own validation script in there, rename `Example.Tests.ps1` by changing its extension to something else than `.Tests.ps1`.  
 This is to ensure that the example script is ignored by `Invoke-Pester`.  
 
-**UPDATE :**
-Added support for multiple validation scripts.
+{% capture notice-text %}
+I added support for multiple validation scripts.  
 `Test-DeploymentReadiness` can only invoke 1 validation script at a time, but if there is more than 1, a dynamic `ValidationScript` parameter is made available to specify the name of the validation script.
-{: .notice--info }
+{% endcapture %}
+
+<div class="notice--info">
+  <h4>Update :</h4>
+  {{ notice-text | markdownify }}
+</div>
 
 It is highly recommended to group related tests into distinct and meaningful `Describe` blocks because, as we'll see later on, some items in the report are displayed on a per-`Describe` block basis.
 
@@ -121,13 +126,12 @@ We get the console output from `Invoke-Pester` for each target machine specified
 
 Additionally, it outputs an object to the pipeline : a `FileInfo` object for the `Index.html` of the report. That way, if we want instant gratification, we can directly open the report in our default browser by piping the output to `Invoke-Item`.
 
-Off course, `Invoke-Pester` generates a bunch of XML files, as well.  
-These are generated in the current directory by default, or in the directory specified via the `OutputPath` parameter.  
+Output files are generated in the current directory by default, or in the directory specified via the `OutputPath` parameter.  
 `Invoke-Pester` generates one XML test result file per target machine and `ReportUnit.exe` generates one HTML report per target machine and the overall report `Index.html`.  
 
 To view the report, we only need to open the `Index.html` because it has links to machine-specific files if we want to drill down to the per-machine reports.  
 
-## Filtering the tests using tags :  
+## Filtering the tests using tags  
 
 As said earlier, all the Pester tests representing the prerequisites should be in a single validation script, so we can potentially end up with a script containing a very large number of tests.  
 To make this more flexible, we can group tests related to the same topic, purpose, or component into distinct `Describe` blocks and give these `Describe` blocks some tags.
@@ -142,7 +146,7 @@ C:\> Test-DeploymentReadiness -ComputerName 'Computer1' -Credential $Cred -Tag '
 
 Similarly, we can exclude the tests contained in the `Describe` blocks which have the tag(s) specified via the `ExcludeTag` parameter.  
 
-## Passing parameters to the validation script :  
+## Passing parameters to the validation script  
 
 It is more than likely that the Pester-based validation script takes parameters, especially since it remotes into target machines, so it may need a `ComputerName` and a `Credential` parameter.  
 
@@ -151,41 +155,48 @@ It passes 1 computer at a time to the validation script's `ComputerName` paramet
 
 If the validation script has a `Credential` parameter, `Test-DeploymentReadiness` passes the value of its own `Credential` parameter to the validation script.
 
-Cool, but what about any other parameters ?  
-That's where the **`-TestParameters`** parameter comes in. The parameter names and values can be passed as a hashtable to the **`-TestParameters`** parameter of **`Test-DeploymentReadiness`**. Then, **`Test-DeploymentReadiness`** passes these into the **`Script`** parameter of **`Invoke-Pester`**, when calling the validation script.
+> Cool, but what about any other parameters ?  
 
-The example validation script **Example.Tests.ps1** takes quite a few parameters, among them are **`DeploymentServerName`** and **`ManagementServerName `**. We can pass values to these 2 parameters, like so :
+That's where the `TestParameters` parameter comes in.  
+The parameter names and values can be passed as a hashtable to the `TestParameters` parameter of `Test-DeploymentReadiness`. Then, `Test-DeploymentReadiness` passes these into the `Script` parameter of `Invoke-Pester`, when calling the validation script.
+
+The example validation script `Example.Tests.ps1` takes quite a few parameters, among them are `DeploymentServerName` and `ManagementServerName`.  
+We can pass values to these 2 parameters, like so :
 
 ```powershell
-C:\> $TestParameters= @{ DeploymentServerName = 'DeplServer1'
-                      ManagementServerName = 'Mgmtserver1'
-                   }
-C:\>
+C:\> $TestParameters = @{ DeploymentServerName = 'DeplServer1'
+ >>                     ManagementServerName = 'Mgmtserver1'
+}
 C:\> 'Computer1','Computer2','Computer3','Computer4','Computer5' |
-Test-DeploymentReadiness -Credential $Cred -OutputPath $env:USERPROFILE\Desktop\Readiness\ -TestParameters $TestParameters
-   
+Test-DeploymentReadiness -Credential $Cred -OutputPath $Path -TestParameters $TestParameters   
 ```
 
-&nbsp;
-## The Reports :  
-As mentioned earlier, we only need to open the generated **Index.html** and this opens the overview report. After running the above command, here is what this looks like :
+## The Reports  
+As mentioned earlier, we only need to open the generated `Index.html` and this opens the overview report.  
+After running the above command, here is what this looks like :  
 
-<a href="http://theshellnut.com/wp-content/uploads/2016/08/Overview-Report.png"><img class="alignnone size-full wp-image-771" src="http://theshellnut.com/wp-content/uploads/2016/08/Overview-Report.png" alt="Overview Report" width="994" height="751" /></a>
+![Overview Report]({{ site.url }}/images/2016-08-29-pester-deployment-readiness-validation-overview.png)
 
-"**Fixture summary**" gives us the number of ready machines and not-so-ready machines whereas the "**Pass percentage**" gives us the percentage of machines which are ready.
+**Fixture summary** gives us the number of ready machines and not-so-ready machines, whereas the **Pass percentage** gives us the percentage of machines which are ready.
 
-We can see that Computer4 is the only machine which failed more than 1 prerequisite. We can see what's going on with it in more detail by clicking on the link named "Computer4" :
+We can see that Computer4 is the only machine which failed more than 1 prerequisite.  
 
-<a href="http://theshellnut.com/wp-content/uploads/2016/08/Computer4-Report.png"><img class="alignnone size-full wp-image-772" src="http://theshellnut.com/wp-content/uploads/2016/08/Computer4-Report.png" alt="Computer4 Report" width="984" height="664" /></a>
+We can drill down into this machine's details by clicking the **Computer4** link :  
 
-We can clearly see 4 distinct prerequisite categories, which corresponds with "**Describe**" blocks in our validation script. Here, "**Fixture summary**" tells us which prerequisite categories contained at least one failed prerequisite(s). In this case, there were 2.
+![Computer4]({{ site.url }}/images/2016-08-29-pester-deployment-readiness-validation-computer4.png)
 
-Let's check which Networking prerequisite(s) were not met by clicking on "Networking prerequisites" :
+We can clearly see 4 distinct prerequisite categories, which corresponds with `Describe` blocks in our validation script.  
+Here, **Fixture summary** tells us which prerequisite categories contained at least one failed prerequisite(s).
 
-<a href="http://theshellnut.com/wp-content/uploads/2016/08/Network-Prerequisites-Details.png"><img class="alignnone size-full wp-image-773" src="http://theshellnut.com/wp-content/uploads/2016/08/Network-Prerequisites-Details.png" alt="Network Prerequisites Details" width="504" height="629" /></a>
+Let's check which Networking prerequisite(s) were not met by clicking on **Networking prerequisites** :  
 
-So now, we have can a good idea of what the issue is (the actual usefulness of the Pester error message will depend on how the test was written).
+![Networking prerequisites]({{ site.url }}/images/2016-08-29-pester-deployment-readiness-validation-networking.png)
+
+So now, we have a better idea of what the issue is.  
+
+The actual usefulness of the Pester error message will depend on how the test is written.
+{: .notice--warning }  
 
 Pretty neat, huh ? I can see this saving me hours and hours of work, and considerably reduce the maintenance windows in future deployments and upgrades.
 
-If this tool doesn't exactly fit your needs or if you think of an enhancement, **<a href="https://github.com/MathieuBuisson/DeploymentReadinessChecker">the code is on GitHub</a>**, feel free to submit an issue, or even better, **to fork it and improve it**.
+If this tool doesn't exactly fit your needs or if you think of an enhancement, the code is [on GitHub](https://github.com/MathieuBuisson/DeploymentReadinessChecker), feel free to submit an issue, or even better, [fork it](https://github.com/MathieuBuisson/DeploymentReadinessChecker/fork) and improve it.
