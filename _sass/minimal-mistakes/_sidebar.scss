@@ -48,6 +48,42 @@
   img {
     width: 100%;
   }
+
+  .tag-cloud {
+
+    padding-left: 6px;
+
+    a.tag-cloud-item {
+      display: inline-block;
+      margin-bottom: 1px;
+      margin-left: 2px;
+      padding: 0px 3px;
+      text-align: center;
+      color: inherit;
+      font-size: $type-size-7;
+      text-decoration: none;
+      border: 1px solid;
+      border-radius: $border-radius;
+      transition: all .21s ease-in-out;
+
+      &.small {
+        font-size: $type-size-7;
+      }
+      &.medium {
+        font-size: $type-size-6;
+      }
+      &.large {
+        font-size: $type-size-5;
+      }
+      &.extralarge {
+        margin-top: 3px;
+        font-size: $type-size-4;
+      }
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
 }
 
 .sidebar__right {

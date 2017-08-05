@@ -15,12 +15,28 @@
 
 <h3><i class="fa fa-fw fa-tags" aria-hidden="true"></i> Topics</h3>
 
-<!-- Get list of tags -->
-{% assign tags = site.tags %}
-{% for tag in tags.name %}
-TagName : {{ tag }}
-{% endfor %}
+{% assign tags = site.tags | sort %}
 
-<!-- Get list and count of posts -->
-{% assign posts_count_total = site.posts | size %}
-Post total : {{ posts_count_total }}
+<div class="tag-cloud">
+  <p>
+  {% for tag in tags %}
+    {% capture tag_word %}{{ tag[0] | strip_newlines }}{% endcapture %}
+    {% assign post_count = tag | last | size %}
+
+    <!-- Setting the size of the item based on the number of posts -->
+    {% if post_count >= 15 %}
+      {% assign size = 'extralarge' %}
+    {% elsif post_count >= 9 %}
+      {% assign size = 'large' %}
+    {% elsif post_count >= 4 %}
+      {% assign size = 'medium' %}
+    {% else %}
+      {% assign size = 'small' %}
+    {% endif %}
+
+    {% capture tag_link_url %}{{ tag_word | slugify | prepend: "#" | prepend: site.tag_archive.path | absolute_url }}{% endcapture %}
+
+    <a href="{{ tag_link_url }}" class="tag-cloud-item {{ size }}" rel="tag">{{ tag_word }}</a>
+  {% endfor %}
+  </p>
+</div>
