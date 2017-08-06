@@ -5,7 +5,7 @@ tags:
   - PowerShell
 ---
 
-Coding, especially in PowerShell, is not about remembering the exact syntax of how to do something, it is more about knowing how to try things out and to find the information you need to do whatever you need to accomplish.
+Coding, especially in PowerShell, is not about remembering the exact syntax of how to do something, it is more about knowing how to try things out and to get the information we need to do whatever we need to accomplish.
 
 Quite often, even though we don't remember the exact syntax, we know the thing we want to do is something we've already done.  
 So there is a good chance it's already in the code base we have on [GitHub](https://github.com/).
