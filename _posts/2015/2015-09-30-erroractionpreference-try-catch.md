@@ -3,7 +3,7 @@ title: A warning on $ErrorActionPreference and Try/Catch for .NET developers
 tags: [.NET, PowerShell]
 ---
 
-I recently stumbled upon a PowerShell Script from a .NET Developer/Architect who shall remain nameless, which contained this :
+I recently stumbled upon a PowerShell Script from a .NET Developer/Architect who shall remain nameless, which contained this :  
 
 ```powershell
 # set error action preference so errors don't stop and the trycatch 

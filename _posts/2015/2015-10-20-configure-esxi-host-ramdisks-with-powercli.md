@@ -5,7 +5,7 @@ tags: [PowerCLI, vSphere]
 
 The symptoms of a full RAMdisk on a ESXi host can be pretty nasty and diverse. The possible causes are also very diverse (search for `ramdisk full` in [the VMware Knowledge Base](http://kb.vmware.com), you will see what I mean).  
 
-Also, it can be affecting the RAMdisk `root`, `tmp`, or even `hostdstats` depending on the cause, so this is not easy to troubleshoot.
+Also, it can be affecting the RAMdisk `root`, `tmp`, or even `hostdstats` depending on the cause, so this is not easy to troubleshoot.  
 
 To help prevent this type of issues, we can increase the size of ESXi RAMdisks by increasing their memory reservation, memory limit and set their reservation as "expandable", just like in resource pools.
 

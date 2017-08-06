@@ -7,7 +7,6 @@ tags:
 
 When there is a OS-handled crash (a blue screen), there are some settings in the **Startup and Recovery** Control Panel, which tells Windows how it should behave. For example, whether it restarts automatically or not, whether it writes a small, a kernel dump or a full memory dump, and where :  
 
-
 ![Shutdown]({{ site.url }}/images/2015-10-04-crash-behaviour-with-powershell-recovery.png)
 
 If you want to troubleshoot a recurrent crash, you may want to alter these settings.  

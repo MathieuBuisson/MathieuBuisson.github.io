@@ -5,7 +5,7 @@ tags: [PowerShell]
 
 > "Have you tried turning it off and on again?"
 
-This quote from <a href="http://www.imdb.com/title/tt0487831/">IT Crowd</a> reflects probably the most universal stereotype about IT support. By the way, using this shortcut instead of actually diagnosing the problem shouldn't be the usual course of action. But still, a reboot can really save you when you are in firefighting mode.
+This quote from <a href="http://www.imdb.com/title/tt0487831/">IT Crowd</a> reflects probably the most universal stereotype about IT support. By the way, using this shortcut instead of actually diagnosing the problem shouldn't be the usual course of action. But still, a reboot can really save you when you are in firefighting mode.  
 
 What if you need to reboot a machine which is remote or in a locked server room ?  
 Here are a few commands to do that remotely:

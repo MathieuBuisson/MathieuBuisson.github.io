@@ -3,10 +3,10 @@ title: Automate the discovery of mandatory parameters
 tags: [PowerShell]
 ---
 
-Sometimes, when trying out a cmdlet I rarely use, I get that :
+Sometimes, when trying out a cmdlet I rarely use, I get that :  
 
 ![Prompt]({{ site.url }}/images/2015-10-07-discovery-mandatory-parameters-prompt.png)  
-This means I forgot to enter a parameter which is mandatory for this cmdlet. PowerShell is very forgiving and asks me nicely to enter a value for this parameter.
+This means I forgot to enter a parameter which is mandatory for this cmdlet. PowerShell is very forgiving and asks me nicely to enter a value for this parameter.  
 
 You see, learning PowerShell is not about rote knowledge of every single cmdlets. We, IT pros, have other things to do with our time than memorizing thousands of cmdlets and parameters.  
 

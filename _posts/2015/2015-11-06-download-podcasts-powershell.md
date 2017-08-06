@@ -48,7 +48,7 @@ MediaFileUrl  : http://feedproxy.google.com/~r/Powerscripting/~5/7F6EtkvLaLg/PSP
 MediaFileName : PSPodcast-320.mp3
 ```
 
-It is also possible to send it a bunch of URLs via the pipeline.
+It is also possible to send it a bunch of URLs via the pipeline.  
 
 Usually though, I don't manually specify URLs. I give it a file listing all my favorite podcasts as input :  
 

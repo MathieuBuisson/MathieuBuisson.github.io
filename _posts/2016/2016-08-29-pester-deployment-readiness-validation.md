@@ -12,7 +12,7 @@ There was a lot of head-scratching and quite a few :
 > "It was working in the Test environment !"  
 
 Because we couldn't afford more downtime, I had to develop an *inelegant* workaround to allow machines to upgrade.  
-But even so, this upgrade rollout went well over the planned maintenance window.
+But even so, this upgrade rollout went well over the planned maintenance window.  
 
 In short, **it was a pain**. And you know what ?  
 Pains are great learning opportunities and powerful incentives to take action. The first lesson was that there was a multitude of different causes which boiled down to inconsistently configured machines.

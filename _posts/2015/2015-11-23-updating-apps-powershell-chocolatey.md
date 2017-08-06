@@ -5,9 +5,9 @@ tags: [Chocolatey, PowerShell]
 
 ## An introduction to the PackageManagement module
 
-If you are using Windows 10 or if you have installed the Windows Management Framework 5.x [available here](https://www.microsoft.com/en-us/download/details.aspx?id=54616), you may have noticed a PowerShell module named `PackageManagement`.
+If you are using Windows 10 or if you have installed the Windows Management Framework 5.x [available here](https://www.microsoft.com/en-us/download/details.aspx?id=54616), you may have noticed a PowerShell module named `PackageManagement`.  
 
-This is the new name for what was called `OneGet` in previous versions of the <abbr title="Windows Management Framework">WMF</abbr> 5.0. It contains the following cmdlets :
+This is the new name for what was called `OneGet` in previous versions of the <abbr title="Windows Management Framework">WMF</abbr> 5.0. It contains the following cmdlets :  
 
 ```powershell
 C:\> (Get-Command -Module PackageManagement).Name

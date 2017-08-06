@@ -3,12 +3,12 @@ title: Managing large numbers of registry settings with PowerShell DSC
 tags: [DSC, PowerShell]
 ---
 
-Recently, I had to manage the configuration of the remote control settings of client machines with PowerShell DSC. These settings are located in the registry key `HKLM:\SYSTEM\CurrentControlSet\Services\HidIr\Remotes` :
+Recently, I had to manage the configuration of the remote control settings of client machines with PowerShell DSC. These settings are located in the registry key `HKLM:\SYSTEM\CurrentControlSet\Services\HidIr\Remotes` :  
 
 ![Remotes registry key]({{ site.url }}/images/2016-03-31-managing-large-numbers-of-registry-settings.png)
 
 Yes, this is 19 registry values for every single remote control model.  
-Here is what a resource entry in a DSC configuration would look like, using the built-in `Registry` resource :
+Here is what a resource entry in a DSC configuration would look like, using the built-in `Registry` resource :  
 
 ```powershell
 Registry IRRemotes

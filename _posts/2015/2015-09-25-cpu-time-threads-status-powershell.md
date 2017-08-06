@@ -4,7 +4,7 @@ tags: [Performance, Windows]
 ---
 
 If there is a process hanging or consuming CPU resources and you have no idea why, a good place to start is to have a look at its threads and what they are doing.  
-Fortunately, Threads are a property of the object you get when run `Get-Process` :
+Fortunately, Threads are a property of the object you get when run `Get-Process` :  
 
 ```powershell
 C:\> Get-Process -Id 10080 | Select-Object -Property 'Id', 'Threads'

@@ -3,7 +3,7 @@ title: PowerShell equivalents for common Linux/bash commands
 tags: [bash, PowerShell]
 ---
 
-The majority of my colleagues have more of a Linux background than Windows. So their `cat` and their `grep` are near and dear to their heart and their first reflex when they get into PowerShell is to replicate these commands.
+The majority of my colleagues have more of a Linux background than Windows. So their `cat` and their `grep` are near and dear to their heart and their first reflex when they get into PowerShell is to replicate these commands.  
 
 First, this is not always a good approach because bash and PowerShell are fundamentally different. When we run bash commands or external executables in bash, we get plain text. When we run PowerShell cmdlets we get objects.  
 So quite often, translating the bash way of doing things to PowerShell is the bad way of doing things. Powershell gives us rich objects with properties and methods to easily extract the information we need and/or to manipulate them in all sorts of ways. Use this to your advantage !

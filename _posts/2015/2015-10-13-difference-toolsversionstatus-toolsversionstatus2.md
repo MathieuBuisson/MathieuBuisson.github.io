@@ -3,7 +3,7 @@ title: What's the difference between ToolsVersionStatus and ToolsVersionStatus2
 tags: [PowerCLI]
 ---
 
-Recently, I had a customer who wanted to check if the VMware Tools were installed and up-to-date using PowerCLI.
+Recently, I had a customer who wanted to check if the VMware Tools were installed and up-to-date using PowerCLI.  
 
 A relatively easy way to do this is with a VirtualMachine view or the `ExtensionData` of a VM object :
 

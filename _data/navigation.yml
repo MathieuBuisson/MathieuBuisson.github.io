@@ -6,3 +6,6 @@ main:
     url: /resources/
   - title: "About"
     url: /about/
+  - title: "Search"
+    url: /search/
+    

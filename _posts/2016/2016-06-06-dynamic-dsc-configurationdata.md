@@ -6,9 +6,9 @@ tags:
   - PowerShell
 ---
 
-When writing a DSC configuration, separating the environmental data from the configuration logic is a best practice : it allows to reuse the same logic for different environments, for example the *Dev*, *QA* and *Prod* environments .  
+When writing a DSC configuration, separating the environmental data from the configuration logic is a best practice : it allows to reuse the same logic for different environments, for example the *Dev*, *QA* and *Prod* environments.  
 
-This generally means that the environment data is stored in separate `.psd1` files. This is explained [in this documentation page](https://msdn.microsoft.com/en-us/powershell/dsc/configdata).
+This generally means that the environment data is stored in separate `.psd1` files. This is explained [in this documentation page](https://msdn.microsoft.com/en-us/powershell/dsc/configdata).  
 
 However, these configuration data files are relatively static, so if the environment changes frequently these files might end up containing outdated information. A solution is to keep the static environment data in the configuration data files and then **adding the dynamic data on the fly**.
 

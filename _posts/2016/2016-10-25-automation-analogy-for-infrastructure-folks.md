@@ -7,7 +7,7 @@ tags:
 
 Nowadays, many IT shops look a lot like the first few pages of [The Phoenix Project](http://itrevolution.com/books/phoenix-project-devops-book/) : lack of automation and communication which leads to manual and unpredictable deployments, which in turn, leads to firefighting.  
 
-Fortunately, many of these shops are starting to understand the value of implementing some of the DevOps principles.
+Fortunately, many of these shops are starting to understand the value of implementing some of the DevOps principles.  
 
 Of all the DevOps principles, automation is the one where the return on investment is the most obvious so that's where most IT organisations start. I'm not saying this is the best starting point, but this is the most typical starting point of a DevOps journey.  
 

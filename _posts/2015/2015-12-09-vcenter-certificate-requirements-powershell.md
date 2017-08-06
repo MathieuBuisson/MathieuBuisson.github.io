@@ -3,9 +3,9 @@ title: Checking vCenter Server certificate requirements with PowerShell
 tags: [PowerShell, vSphere]
 ---
 
-Given the number and the complexity of certificate-related issues we get at VMware Support, I wanted an automated way to check whether a certificate file meets the vCenter Server certificate requirements.
+Given the number and the complexity of certificate-related issues we get at VMware Support, I wanted an automated way to check whether a certificate file meets the vCenter Server certificate requirements.  
 
-There are 2 ways to extract the necessary information from a certificate file : `openssl.exe` and the cmdlet `Get-PfxCertificate`, which was introduced with PowerShell 3.0.
+There are 2 ways to extract the necessary information from a certificate file : `openssl.exe` and the cmdlet `Get-PfxCertificate`, which was introduced with PowerShell 3.0.  
 
 Here is the `Get-PfxCertificate` command and its output :
 

@@ -10,7 +10,7 @@ Here is the official (and laconic) statement from the [vSphere 6.0 release notes
 > **vSphere Client** : The Storage Views tab is no longer available in the vSphere 6.0 Client.  
 
 
-Quite a few customers were unhappy and asking what we were offering as a replacement/alternative.
+Quite a few customers were unhappy and asking what we were offering as a replacement/alternative. 
 
 To ease the pain of some customers, I wrote a PowerCLI alternative for the defunct Storage Reports feature.  
 

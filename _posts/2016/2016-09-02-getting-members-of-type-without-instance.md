@@ -4,9 +4,9 @@ tags:
   - PowerShell
 ---
 
-I read [Jeff Hicks](https://twitter.com/jeffhicks)'s article about "[Dancing on the table with PowerShell](https://www.petri.com/dancing-on-the-table-with-powershell)". The content is really quite fascinating (go read it !), but I got hung up on something.
+I read [Jeff Hicks](https://twitter.com/jeffhicks)'s article about "[Dancing on the table with PowerShell](https://www.petri.com/dancing-on-the-table-with-powershell)". The content is really quite fascinating (go read it !), but I got hung up on something.  
 
-He creates a new object of the type `[System.Data.DataTable]`, pipes it to `Get-Member` and shows that we can't discover the members of this object type, like so :
+He creates a new object of the type `[System.Data.DataTable]`, pipes it to `Get-Member` and shows that we can't discover the members of this object type, like so :  
 
 ```powershell
 C:\> $table = New-Object -TypeName 'System.Data.DataTable'
