@@ -5,7 +5,7 @@ permalink: /search/
 ---
 
 <div class="search-container">
-  <form action="{{ site.url }}/search/" method="get">
+  <form action="{{ page.url | absolute_url }}" method="get">
     <label for="search-box"></label>
     <input type="text" id="search-box" name="query" placeholder="Search posts" style="width:50%" autofocus>
     <button class="btn btn--info" type="submit"> &nbsp;<i class="fa fa-search" aria-hidden="true"></i> &nbsp;</button>
@@ -26,5 +26,5 @@ permalink: /search/
     {% endfor %}
   };
 </script>
-<script src="{{ site.url }}/js/lunr.min.js"></script>
-<script src="{{ site.url }}/js/search.js"></script>
+<script src='{{ "/js/lunr.min.js" | absolute_url }}'></script>
+<script src='{{ "/js/search.js" | absolute_url }}'></script>
