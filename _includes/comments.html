@@ -45,11 +45,11 @@
               {% endif %}
             </div>
             <!-- End static comments -->
-
+            <script src='https://www.google.com/recaptcha/api.js'></script>
             <!-- Start new comment form -->
             <h4 class="page__comments-title">{{ site.data.ui-text[site.locale].comments_label | default: "Leave a Comment" }}</h4>
             <p class="small">{{ site.data.ui-text[site.locale].comment_form_info | default: "Your email address will not be published. Required fields are marked" }} <span class="required">*</span></p>
-            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v1/entry/{{ site.repository }}/{{ site.staticman.branch }}">
+            <form id="new_comment" class="page__comments-form js-form form" method="post" action="https://api.staticman.net/v2/entry/{{ site.repository }}/{{ site.staticman.branch }}/comments">
               <div class="form__spinner">
                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
                 <span class="sr-only">{{ site.data.ui-text[site.locale].loading_label | default: "Loading..." }}</span>
@@ -76,12 +76,17 @@
                 <input type="hidden" name="options[slug]" value="{{ page.slug }}">
                 <label for="comment-form-location">Not used. Leave blank if you are a human.</label>
                 <input type="text" id="comment-form-location" name="fields[hidden]" autocomplete="off"/>
+                <input type="text" name="options[reCaptcha][siteKey]" value="6LfHDiwUAAAAADsLrNrJ0vTWQl58cnDap4aiy1qA">
+                <input type="text" name="options[reCaptcha][secret]" value="jbYHt2g0X75xdOpKd5Xx6gqCr/d95Xt8Onr5k2kSB8wEj/e1czGGwsiLvkdHhNVTx7wB9viSIJvUW9JTmgijEtpXDUq9+QYu3tuQYuoYdbtu0D3hL333aci0aMSA5MGBl9Ut0W9eYMkldx5Okniabx67qrVsi613doOvhs7l+BE=">
               </fieldset>
               <!-- Start comment form alert messaging -->
               <p class="hidden js-notice">
                 <strong class="js-notice-text"></strong>
               </p>
               <!-- End comment form alert messaging -->
+              <fieldset>
+                <div class="g-recaptcha" data-sitekey="6LfHDiwUAAAAADsLrNrJ0vTWQl58cnDap4aiy1qA"></div>
+              </fieldset>
               <fieldset>
                 <button type="submit" id="comment-form-submit" tabindex="5" class="btn btn--large">{{ site.data.ui-text[site.locale].comment_btn_submit | default: "Submit Comment" }}</button>
               </fieldset>
