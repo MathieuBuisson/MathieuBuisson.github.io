@@ -372,6 +372,9 @@
   @include breakpoint($large) {
     width: calc(100% - 100px);
   }
+  p {
+    font-size: 0.93em;
+  }
 }
 
 .comment__author {
