@@ -1,0 +1,8 @@
+_id: e1e0b4f0-7bb0-11e7-b1ac-353e76822851
+message: "Is it possible to use:  \r\n`Invoke-ScriptAnalyzer -Path $path`  \r\n\r\nRather than having to use:  \r\n\r\n```powershell\r\nInvoke-ScriptAnalyzer -Path .\\ExampleScript.ps1 -CustomRulePath .\\MBAnalyzerRules.psm1 |\r\nSelect-Object RuleName, Line, Message | Format-Table -AutoSize -Wrap\r\n```\r\n?"
+name: David
+email: e6df6b52837a06e183d2399554b4cd10
+url: ''
+hidden: ''
+timestamp: 1502138530
+date: '2017-08-07T20:42:10.251Z'
