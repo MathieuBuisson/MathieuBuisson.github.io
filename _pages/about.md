@@ -10,6 +10,8 @@ I like experimenting, exploring technologies, automating things, <del>breaking</
 The main purpose of this blog is to document the results of my experimentations.  
 Documenting this in the form of blog posts allows me to retrieve and share this information easily.  
 
+This entire site and its content are open-source, the code is available [here<i class="fa fa-fw fa-github" aria-hidden="true"></i>](https://github.com/MathieuBuisson/MathieuBuisson.github.io).  
+
 > Where does the name "**TheShellNut**" come from ?  
 
 It is a vestige from the previous incarnation of this blog : **theshellnut.com**.   
