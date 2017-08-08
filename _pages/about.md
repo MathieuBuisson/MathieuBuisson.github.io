@@ -34,7 +34,7 @@ I’m a Senior DevOps Engineer at [Oneview Healthcare](http://www.oneviewhealthc
   - Lots of coffee (this might be the only area of my life where quantity matters more than quality)  
   - Music (here is [my coding playlist](https://open.spotify.com/user/mathieubuisson/playlist/4YxhSI2Cpwej2CEU3YxoD5))  
 
-## Contact Me  
+## Get in touch  
 
 <form action="https://formspree.io/theshellnut@outlook.com" method="POST" style="width: 70%">
   <fieldset>
