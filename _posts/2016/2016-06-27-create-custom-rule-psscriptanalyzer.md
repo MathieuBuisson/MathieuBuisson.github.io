@@ -3,6 +3,7 @@ title: How to create a custom rule for PSScriptAnalyzer
 tags:
   - DevOps
   - PowerShell
+  - Linting
 ---
 
 As you probably know, [PSScriptAnalyzer](https://github.com/PowerShell/PSScriptAnalyzer) is a static code analysis tool, which checks PowerShell code against rules representing best practices and style guidelines.  
