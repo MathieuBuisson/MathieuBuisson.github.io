@@ -5,17 +5,17 @@ tags: [DevOps, Pester, Linting]
 
 As you already know if you have read [this]({% post_url 2016/2016-05-19-psscriptanalyzer-appveyor %}) or [this]({% post_url 2016/2016-06-27-create-custom-rule-psscriptanalyzer %}), I'm a big fan of `PSScriptAnalyzer` to maintain a certain coding standard. This is especially powerful inside a release pipeline because this allows us to enforce that coding standard.  
 
-In our CI pipeline, we can easily make the build fail if our code violates one or more `PSScriptAnalyzer` rule(s).  
+In our <abbr title="Continuous Integration">CI</abbr> pipeline, we can easily make the build fail if our code violates `PSScriptAnalyzer` rule(s).  
 That's great, but the main point of [continuous integration](http://martinfowler.com/articles/continuousIntegration.html) is to give quick feedback to developers about their code change(s). It is about catching problems early **to fix them** early. So the question is :  
 
 > How can we make our CI tool publish `PSScriptAnalyzer` results with the information we need to remediate any violation ?  
 
-All CI tools have ways to publish test results to make them highly visible, to drill down into a test failure and do some reporting.  
+All <abbr title="Continuous Integration">CI</abbr> tools have ways to publish test results to make them highly visible, to drill down into a test failure and do some reporting.  
 
 Since we are talking about a **PowerShell** pipeline, we are most likely already using Pester to test our PowerShell code.  
-Pester can spit out results in the same `XML` format as NUnit and these NUnit `XML` files can be consumed and published by most CI tools.  
+Pester can spit out results in the same `XML` format as NUnit and these NUnit `XML` files can be consumed and published by most <abbr title="Continuous Integration">CI</abbr> tools.  
 
-It makes a lot of sense to leverage this Pester integration as a universal CI glue and run our `PSScriptAnalyzer` checks as Pester tests.  
+It makes a lot of sense to leverage this Pester integration as a universal <abbr title="Continuous Integration">CI</abbr> glue and run our `PSScriptAnalyzer` checks as Pester tests.  
 Let's look at possible ways to do that.
 
 ## One Pester test checking PSScriptAnalyzer output  
@@ -43,7 +43,7 @@ There are 2 problems here :
 How useless ? Well, let’s see :  
 
 ```powershell
-E:\> Invoke-Pester -Script .\Example.Tests.ps1
+Invoke-Pester -Script '.\Example.Tests.ps1'
 Executing all tests in .\Example.Tests.ps1
 
 Executing script .\Example.Tests.ps1
@@ -125,30 +125,13 @@ Just by reading the name of the test case, we get the essential information : th
 Also, we can expand any failed test to get additional information.  
 For example, the last 2 tests are expanded below :  
 
-<a href="http://theshellnut.com/wp-content/uploads/2016/11/Appveyor-test-details.png"><img src="http://theshellnut.com/wp-content/uploads/2016/11/Appveyor-test-details.png" alt="appveyor-test-details" width="967" height="650" class="alignnone size-full wp-image-886" /></a>
+![Appveyor test details]({{ "/images/2016-11-30-psscriptanalyzer-first-class-citizen-details.png" | absolute_url }})  
 
-The "Stacktrace" section provides additional details, like the rule severity and the actual offending code. Another nice touch is that the "Message" section gives us the rule message, which normally provides an actionable recommendation to remediate the problem.
+The "**Stacktrace**" section provides additional details, like the rule severity and the actual offending code. Another nice touch is that the "**Error message**" section gives us the rule message, which normally provides an actionable recommendation to remediate the problem.  
 
-But, what if `PSScriptAnalyzer` returns nothing ?
-`Export-NUnitXml` does handle this scenario gracefully because its ScriptAnalyzerResult parameter accepts $Null.
-In this case, the test result file will contain only one test case and this test passes.
+> But, what if `PSScriptAnalyzer` returns nothing ?  
 
-Let's test this :
+`Export-NUnitXml` does handle this scenario gracefully because its `ScriptAnalyzerResult` parameter accepts `$Null`. In this case, the test result file will contain only 1 test case and this test will pass.  
 
-```powershell
-Import-Module -Name 'PsScriptAnalyzer' -Force
-Import-Module ".\Export-NUnitXml\Export-NUnitXml.psm1" -Force
-Export-NUnitXml -ScriptAnalyzerResult $Null -Path ".\ScriptAnalyzerResult.xml"
-
-(New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\ScriptAnalyzerResult.xml))
-  
-```
-
-Here is what it looks like in Appveyor:
-
-<a href="http://theshellnut.com/wp-content/uploads/2016/11/Appveyor-passed-PSScriptAnalyzer-tests.png"><img src="http://theshellnut.com/wp-content/uploads/2016/11/Appveyor-passed-PSScriptAnalyzer-tests.png" alt="appveyor-passed-psscriptanalyzer-tests" width="886" height="210" class="alignnone size-full wp-image-890" /></a>
-
-There's nothing more beautiful than a green test...
-
-So now, as developers, we not only have quick feedback on our adherence to coding standards, but we also get actionable guidance on how to improve.
-And remember, this NUnit XML format is widely supported in the CI/CD world, so even though I only showed Appveyor, this would work similarly in TeamCity, Microsoft VSTS, and others...
+So now, we not only have quick feedback on our adherence to coding standards, but we also get actionable guidance on how to improve.  
+And remember, this NUnit `XML` format is widely supported in the CI/CD tooling world, so this would work similarly in TeamCity, Microsoft VSTS, and others...
