@@ -102,12 +102,12 @@ Being a PowerShell kind of guy, my first choice was to use a standard PowerShell
 }
 ```
 
-We have to specify the type `PSCustomObject`, otherwise it would be a `hashtable` when imported back into PowerShell.  
+We have to specify the type `[PSCustomObject]`, otherwise it would be a `[hashtable]` when imported back into PowerShell.  
 Unfortunately, `Import-PowerShellDataFile` doesn't like that :  
 
 ![Import-PowerShellDataFile error]({{ "/images/2017-02-14-storing-mock-objects-in-json-error.png" | absolute_url }})  
 
-This is because to safely import data, `Import-PowerShellDataFile` works in **RestrictedLanguage** mode. And in this mode, casting to a `PSCustomObject` (to any type, for that matter) is forbidden.
+This is because to safely import data, `Import-PowerShellDataFile` works in **RestrictedLanguage** mode. And in this mode, casting to a `[PSCustomObject]` (to any type, for that matter) is forbidden.
 
 We could use `Invoke-Expression` instead, but we've been told that [Invoke-Expression is evil](https://blogs.msdn.microsoft.com/powershell/2011/06/03/invoke-expression-considered-harmful/), so we should probably look for another option.  
 
@@ -162,12 +162,13 @@ The data is organized hierarchically, as follow :
   - The next level describes each scenario (or test case)  
   - The inner level is the actual object(s) that we want the `Mock` to return  
 
-As we can see above, the second scenario (labelled "2ProcessesWithMatchingName") returns an array of 2 objects. We could make it return 3, or more, if we wanted to. We could also have multiple modules in some of our fake processes, but for illustration purposes, the above is enough.
+As we can see above, the second scenario (labelled "2ProcessesWithMatchingName") returns an `[array]` of 2 objects. We could make it return 3, or more, if we wanted to.  
+We could also have multiple modules in some of our fake processes, but for illustration purposes, the above is enough.
 
-We can import this data back into PowerShell with `ConvertFrom-Json` and explore the objects it contains, and their properties using what I call "dot-browsing" :
+We can import this data back into PowerShell with `ConvertFrom-Json` and explore the objects it contains, and their properties using what I call *dot-browsing* :
 
 ```powershell
-C:\> $JsonMockData = Get-Content .\TestData\MockObjects.json -Raw
+C:\> $JsonMockData = Get-Content -Path '.\MockObjects.json' -Raw
 C:\> $Mocks = ConvertFrom-Json $JsonMockData
 C:\> $2ndTestCase = $Mocks.'Get-Process'.'2ProcessesWithMatchingName'
 C:\> $2ndTestCase.Modules
@@ -177,24 +178,60 @@ ModuleName          ProductVersion FileVersionInfo
 Module1FromProcess1 1.0.0.1        @{IsPreRelease=False}
 Module1FromProcess2 2.0.0.1        @{IsPreRelease=True}
 
-
 C:\> $2ndTestCase.Modules.FileVersionInfo.IsPreRelease
 False
 True
-   
 ```
 
-Now, let's see how we can use this in our tests :
- href="http://theshellnut.com/wp-content/uploads/2017/02/TestSuiteWithJsonMocks.png"><img src="http://theshellnut.com/wp-content/uploads/2017/02/TestSuiteWithJsonMocks.png" alt="" width="700" height="936" class="alignnone size-full wp-image-2637" /></a>
+Now, let's see how we can use this in our tests :  
 
-Within each Context block, we get the Mock for a specific scenario that we have defined in our JSON data and store it into the ContextMock variable. Then, to define our Mock, we just specify that its return value is our ContextMock variable.
+```powershell
+$ScriptPath = "$PSScriptRoot\Get-ProcessModule.ps1"
+. $ScriptPath
 
-We can even use the ContextMock variable to get the expected values for the Should assertions, like in the first 2 tests above.
+$JsonMockData = Get-Content -Path "$PSScriptRoot\MockObjects.json" -Raw
+$Mocks = ConvertFrom-Json $JsonMockData
 
-You might be wondering why the hell I would filter ContextMock with : `Where-Object { $_ }`, in the second Context block. Well, this is because importing arrays from JSON to PowerShell has a tendency to add $Null items in the resulting array.
+Describe 'Get-ProcessModule' {
+    Context 'There is 1 running process with the specified name' {
+        
+        $ContextMock = $Mocks.'Get-Process'.'1ProcessWithMatchingName'
+        Mock Get-Process { $ContextMock }
+        It 'Returns the correct module name' {
+            (Get-ProcessModule -Name 'Any').Name |
+            Should Be $ContextMock.Modules.ModuleName
+        }
+        It 'Returns the correct module version' {
+            (Get-ProcessModule -Name 'Any').Version |
+            Should Be $ContextMock.Modules.ProductVersion
+        }
+        It 'Returns the correct PreRelease value' {
+            (Get-ProcessModule -Name 'Any').PreRelease |
+            Should Be $False
+        }
+    }
+    Context 'There are 2 processes with the specified name' {
+        
+        $ContextMock = $Mocks.'Get-Process'.'2ProcessesWithMatchingName'
+        Mock Get-Process { $ContextMock | Where-Object { $_ } }
+        It 'Returns modules from both processes' {
+            (Get-ProcessModule -Name 'Any').Count |
+            Should Be 2
+        }
+    }
+}
+```
 
-In this case, $ContextMock contained 3 objects : the 2 fake process objects, as expected, and a $Null element. Why ? I have no idea, but I was able to get rid of it with the `Where-Object` statement above.
+Within each `Context` block, we get the Mock object for a specific scenario that we have defined in our JSON data and store it into `$ContextMock`. Then, to define our `Mock`, we just specify that its return value is `$ContextMock`.  
 
-As we can see, it makes the tests cleaner and allows to define Mocks in an expressive way, so overall, I think this is a nice solution to manage complex Mock data.
+We can even use the `$ContextMock` variable to get the expected values for the `Should` assertions, like in the first 2 tests above.  
+
+You might be wondering why the hell I would filter `$ContextMock` with : `Where-Object { $_ }`, in the second `Context` block.  
+Well, this is because importing arrays from JSON to PowerShell has a tendency to add `$Null` items in the resulting array.  
+
+In this case, `$ContextMock` contained 3 objects : the 2 fake process objects, as expected, and a `$Null` element.  
+Why ? I have no idea, but I was able to get rid of it with the `Where-Object` statement above.  
+
+As we can see, it makes the tests cleaner and allows to define Mocks in an expressive way, so overall, I think this is a nice solution to manage complex `Mock` data.  
 
 That said, unit testing is still a relatively new topic in the PowerShell community, and I haven't heard or read anything on best practices around test data. So I'm curious, how do you guys handle Mock objects and more generally, test data ? Do you have any tips or techniques ?
