@@ -1,0 +1,7 @@
+_id: 3ead2350-7e7f-11e7-9335-bb081fcd1691
+message: "Nice post! Thank you!  \r\nI had some problems with scoping in my Pester tests when mocking functions in a script module.  \r\n\r\nIf you try to mock a function call inside your script module you have to pass the name of your script module to “Mock”:  \r\n```powershell\r\nMock Get-Process { $ContextMock } -ModuleName “YourScriptModule”\r\n```\r\n\r\nHowever, your `$ContextMock` object will not be the instance you set up outside of the `Mock` call because this is in another scope.  \r\n\r\nFor being able to set up your mocks from a JSON file you can use `InModuleScope`. Then you have to load the mock objects and write your tests inside of the `InModuleScope` script block. Furthermore, you do not have to specify the module name with `Mock`.  \r\n\r\n```powershell\r\nInModuleScope -ModuleName “YourScriptModule” {\r\n    \r\n    $Mocks = Get-Content $PSScriptRoot\\Mocks.json -Raw | ConvertFrom-Json\r\n    Describe “Get-ProcessModule” {\r\n        \r\n        Context '1 running process' {\r\n            $ContextMock = $Mocks.'Get-Process'.'1ProcessWithMatchingName'\r\n            Mock Get-Process { $ContextMock }\r\n            \r\n            It '' {\r\n                ...\r\n            }\r\n        }\r\n    }\r\n```"
+name: Helmut Rohregger
+email: f31b537cb62ba1aeb81c62fabd244cef
+url: ''
+hidden: ''
+date: '2017-08-11T10:24:24.162Z'
