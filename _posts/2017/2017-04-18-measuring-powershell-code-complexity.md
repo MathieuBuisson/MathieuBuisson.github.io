@@ -222,7 +222,8 @@ This is correct because it counted all the `For` loops, including the nested one
 Now that we know how to count additional code paths due to `If`, `ElseIf` and `For`, we can use similar techniques for the other PowerShell language constructs mentioned earlier.  
 I'm not going to show examples for every one of them here, but you can have a look at the functions [in there](https://github.com/MathieuBuisson/PSCodeHealth/tree/master/PSCodeHealth/Private/Metrics).  
 
-We can aggregate the number of the paths found by all these construct-specific functions in a separate function which takes a **FunctionDefinitionAST **object as input and spits out the overall cyclomatic complexity of that function. It looks like this :
+We can aggregate the number of the paths found by all these construct-specific functions in a separate function which takes a `FunctionDefinitionAST` object as input and spits out the total cyclomatic complexity of that function.  
+It looks like this :  
 
 ```powershell
 Function Measure-FunctionComplexity {
@@ -237,41 +238,34 @@ Function Measure-FunctionComplexity {
     [int]$DefaultComplexity = 1
 
     $ForPaths = Measure-FunctionForCodePath $FunctionDefinition
-
     $IfPaths = Measure-FunctionIfCodePath $FunctionDefinition
-
     $LogicalOpPaths = Measure-FunctionLogicalOpCodePath $FunctionDefinition
-
     $SwitchPaths = Measure-FunctionSwitchCodePath $FunctionDefinition
-
     $TrapCatchPaths = Measure-FunctionTrapCatchCodePath $FunctionDefinition
-
     $WhilePaths = Measure-FunctionWhileCodePath $FunctionDefinition
-
     [int]$TotalComplexity = $DefaultComplexity + $ForPaths + $IfPaths + $LogicalOpPaths + $SwitchPaths + $TrapCatchPaths + $WhilePaths
     return $TotalComplexity
 }
 ```
 
-We start with an initial value of 1 because a piece of code which doesn't contain any logic/branching has exactly 1 code path.
-
-What is the cyclomatic complexity of our function ?
+We start with an initial value of 1 because a piece of code which doesn't contain any logic/branching has exactly 1 code path. And the total cyclomatic complexity of our function is :  
 
 ```powershell
 C:\> Measure-FunctionComplexity $DummyFunction
-6
-   
+6   
 ```
-That's great, but what is this telling us ?
-Is our function too complex or not ? **<a "http://stackoverflow.com/questions/30448693/cyclomatic-complexity-how-much-is-too-much">How much is too much ?</a>**
 
-Well, **the purpose of metrics is to help our brain, not to replace it**. Like any metric, we should take this number with a grain of salt and adapt it to our context. That said, the most commonly used thresholds are 10 and 15. I have a feeling that higher numbers might be fine for PowerShell code because it tends to be more readable than other languages, but that's very much arguable.
+> That's great, but what is this telling us ?  
+> Is our function too complex or not ?  
 
-Besides, this cyclomatic measurement is **only one side of the complexity coin**. To illustrate this, let's look at this piece of code :
+Well, the purpose of metrics is to help our brain, **not to replace it**.  
+Like any metric, we should take this number with a grain of salt and adapt it to our context. That said, the most commonly used thresholds are 10 and 15.  
+I have a feeling that higher numbers might be fine for PowerShell code because it tends to be more readable than other languages, but that's very much arguable.  
+
+Besides, this cyclomatic measurement is **only one side of the complexity coin**. To illustrate this, let's look at this piece of code :  
 
 ```powershell
 $Now = Get-Date
-
 Switch ($Now.Month)
 {
     1 { $Month = 'January'; break }
@@ -289,26 +283,26 @@ Switch ($Now.Month)
 }
 ```
 
-The cyclomatic complexity of this piece of code is 13 (in theory, because in reality **<code>$Now.Month</code>** will always be a number between 1 and 12, but that's not the point here). So the cyclomatic complexity is pretty high, even though most coders would consider this piece of code as easy to understand and maintain.
+The cyclomatic complexity of this piece of code is 13. So the cyclomatic complexity is pretty high, even though most coders would consider this piece of code as easy to understand and maintain.  
 
-So it can be useful to look at another metric, which measures a different aspect of complexity.
+So it can be useful to look at another metric, which measures a different aspect of complexity.  
 
 ## Maximum nesting depth :  
 
-First, what is the maximum **<a "https://help.semmle.com/wiki/display/CSHARP/Nesting+depth">nesting depth</a>** (sometimes called "Nested Block Depth") ? 
+> What is the maximum [nesting depth](https://help.semmle.com/wiki/display/CSHARP/Nesting+depth) ?  
 
-It is the depth of the most deeply nested code in a given piece of code (a function, here). For example, if we have an **If **statement nested in a loop, which is itself nested in a **Catch **block, the most deeply nested section is the body of the **If** statement and its nesting depth is 3.
+It is the depth of the most deeply nested code in a given piece of code (a function, here).  
+For example, if we have an `If` statement nested in a loop, which is itself nested in a `Catch` block, the most deeply nested section is the body of the `If` statement and its nesting depth is 3.  
 
-Let's take a new look at our dummy function, but this time **under the nesting depth lens** (it's the same function but I show it here again so you don't have scroll up) :
+Let's take a new look at our dummy function, but this time **under the nesting depth lens** (it's the same function but I show it here again so you don't have scroll up) :  
 
 ```powershell
 Function Test-Conditional {
- 
+
     [CmdletBinding()]
     Param(
         [int]$IfElseif
     )
- 
     # Testing nested If statement
     If ( $IfElseif -gt 20 ) {
         If ( $IfElseif -gt 40 ) {
@@ -325,8 +319,7 @@ Function Test-Conditional {
         Else {
             #Testing For statements
             For ($i = 1; $i -lt 99; $i++) {
-                Write-Host "$($IfElseif + $i)"
-        
+                Write-Host "$($IfElseif + $i)"       
                 For ($j = 0; $j -lt 10; $j++) {
                     Write-Host "$($IfElseif - $j)"
                 }
@@ -339,36 +332,41 @@ Function Test-Conditional {
 }
 ```
 
-The code at line 11 is inside an **If **Statement, which is itself in another **If **statement, so its nesting depth is 2.
+The code at line 11 is inside an `If` Statement, which is itself in another `If` statement, so its nesting depth is 2.  
 
-The code at line 27 is inside a **For **loop, which is itself in a **For **loop, which is inside an **Else **statement, which is nested in another **Else **statement. So the nesting depth of line 27 is 4, and it is the most deeply nested section in our dummy function. **So the maximum nesting depth of our function is 4**.
+The code at line 27 is inside a `For` loop, which is itself in a `For` loop, which is inside an `Else` statement, which is nested in another `Else` statement. So the nesting depth of line 27 is 4, and it is the most deeply nested section in our dummy function.  
+So the maximum nesting depth of our function is 4.  
 
-At this point, you might be wondering : how does this matter ? **What aspect of complexity is this measuring ?** 
+> How does this matter ?  
+> What aspect of complexity is this measuring ?  
 
-Well, line 27 is in itself very simple but, because of its nesting level, to really understand what it does we need to understand its context. We need to understand the value of **<code>$j</code>** (which changes through the inner loop) and the value of **<code>$i</code>** (which changes through the outer loop). We also need to understand the **If **statement at line 18 and even the **If **statement all the way up to line 9 because we need to know in which set of conditions the code at line 27 is run.
+Well, this line is very simple in itself but, to understand completely what it does and under which condition, we need to understand its context.  
 
-So basically, the nesting depth of a piece of code measures **the complexity of its context**.
+We need to understand the value of `$j` (which changes through the inner loop) and the value of `$i` (which changes through the outer loop). We also need to understand the `If` statement at line 18 and even all the way up to the first `If` because we need to know in which set of conditions this section of code is run.  
 
-Visually, this is easy to follow by looking at the indentation level, but to determine programmatically the nesting depth of a piece of code, we cannot assume that code is always properly indented. I could have used a recursive function or built a custom **<a "https://msdn.microsoft.com/en-us/library/system.management.automation.language.astvisitor(v=vs.85).aspx">AstVisitor</a>**, but I found these methods too ... complex (pun intended).
+So basically, the nesting depth of a piece of code measures **the complexity of its context**.  
 
-Fortunately, all the logic, control, and looping constructs where nesting occurs in PowerShell have something in common : **curly braces**. So we can extract all the curly braces from the code and count them to determine the nesting level, like so :
+Visually, this is easy to follow by looking at the indentation level, but to determine programmatically the nesting depth of a piece of code, we cannot assume that code is always properly indented.  
+I could have used a recursive function or built a custom [AstVisitor](https://msdn.microsoft.com/en-us/library/system.management.automation.language.astvisitor(v=vs.85).aspx), but I found these methods too ... complex (pun intended).  
+
+Fortunately, all the logic, control, and looping constructs where nesting occurs in PowerShell have something in common : **curly braces**.  
+So we can extract all the curly braces from the code and count them to determine the nesting level, like so :  
 
 ```powershell
 Function Measure-FunctionMaxNestingDepth {
 
     [CmdletBinding()]
-    [OutputType([System.Int32])]
+    [OutputType([Int32])]
     Param (
-        [Parameter(Position=0, Mandatory=$True)]
+        [Parameter(Position=0, Mandatory)]
         [System.Management.Automation.Language.FunctionDefinitionAst]$FunctionDefinition
     )
-
     $FunctionText = $FunctionDefinition.Extent.Text
     $Tokens = $Null
     $Null = [System.Management.Automation.Language.Parser]::ParseInput($FunctionText, [ref]$Tokens, [ref]$Null)
 
     [System.Collections.ArrayList]$NestingDepthValues = @()
-    [System.Int32]$NestingDepth = 0
+    [Int32]$NestingDepth = 0
     [System.Collections.ArrayList]$CurlyBrackets = $Tokens | Where-Object { $_.Kind -in 'AtCurly','LCurly','RCurly' }
 
     # Removing the first opening curly and the last closing curly because they belong to the function itself
@@ -377,7 +375,6 @@ Function Measure-FunctionMaxNestingDepth {
     If ( -not $CurlyBrackets ) {
         return $NestingDepth
     }
-
     Foreach ( $CurlyBracket in $CurlyBrackets ) {
 
         If ( $CurlyBracket.Kind -in 'AtCurly','LCurly' ) {
@@ -388,33 +385,37 @@ Function Measure-FunctionMaxNestingDepth {
         }
         $NestingDepthValues += $NestingDepth
     }
-        Write-Verbose "Number of nesting depth values : $($NestingDepthValues.Count)"
-        $MaxDepthValue = ($NestingDepthValues | Measure-Object -Maximum).Maximum -as [System.Int32]
-        return $MaxDepthValue
+    Write-Verbose "Number of nesting depth values : $($NestingDepthValues.Count)"
+    $MaxDepthValue = ($NestingDepthValues | Measure-Object -Maximum).Maximum -as [Int32]
+    return $MaxDepthValue
 }
 ```
 
-Line 10 to 12 are parsing the text of the function definition into tokens.
+First, we parse the text of the function definition into tokens.  
 
-At lines 14 and 15, we initialize 2 variables which are used to keep track of the nesting depth. **<code>$NestingDepth</code>** represents the nesting level at any given point in time. The different values of **<code>$NestingDepth</code>** at different points in time are stored in **<code>$NestingDepthValues</code>**.
+`$NestingDepth` represents the nesting level at any given point in time. Its different values at different points in time are stored in `$NestingDepthValues`.  
 
-Line 16 : we get all the tokens corresponding to curly braces. '**AtCurly**' is a special case, these are the tokens representing opening braces for hashtables. I chose to include the curly braces for hashtables in the nesting calculation because there can be scriptblocks and expressions inside hashtables.
+Then, we filter the tokens corresponding to curly braces.  
+`AtCurly` is a special case, these are the tokens representing opening braces for hashtables. I chose to include the curly braces for hashtables in the nesting calculation because there can be scriptblocks and expressions inside hashtables.  
 
-The core of this function is the **Foreach **loop (line 25 to 34). It loops through all the curly brace tokens and it increments by 1 the nesting depth if it is an opening curly brace and decrements it by 1 if it is a closing brace. Then, the new nesting depth value is added to **<code>$NestingDepthValues</code>**, which keeps track of all the different values of nesting depth.
+The core of this function is the `Foreach` loop. It loops through all the curly brace tokens and it increments by 1 the nesting depth if it is an opening curly brace and decrements it by 1 if it is a closing brace.  
+Then, the new nesting depth value is added to `$NestingDepthValues`, which keeps track of all the different values of nesting depth.  
 
-When we are done looping through the curly brace tokens, we take all the values in **<code>$NestingDepthValues</code>** and we keep the highest one.
+When we are done looping through the curly brace tokens, we take all the values in `$NestingDepthValues` and we keep the highest one.  
 
-Let's run that against our dummy function :
+Let's run that against our dummy function :  
 
 ```powershell
 C:\> Measure-FunctionMaxNestingDepth $DummyFunction
-4
-    
+4    
 ```
 
-As expected, the maximum nesting depth of the dummy function is 4.
+As expected, the maximum nesting depth of the dummy function is 4.  
 
-Great, but is 4 a good number or a bad number ?
-As you probably guessed, the answer is : **it depends**. But there seems to be a consensus, even across different languages (**<a "http://www.codergears.com/xclarify/Metrics#MetricsOnMethods">Java on this page</a>** and **<a "http://www.ndepend.com/docs/code-metrics#ILNestingDepth">C# here</a>**) : **nesting depth of 4 or higher is complex**, nesting depth of 8 or higher is extremely complex.
+> Great, but is 4 a good number or a bad number ?  
 
-With these 2 complementary metrics, we have a basis to make decisions on whether or not we should split our code into smaller, simpler functions. We can also use these metrics to track our progress when refactoring a PowerShell project, to ensure we are making it more understandable, testable and maintainable. **Technical excellence is not a destination, it's a journey**. So how the numbers are changing over time is more important than the numbers themselves.
+As you probably guessed, the answer is : *it depends*.  
+But there seems to be a consensus, even across different languages ([Java on this page](http://www.codergears.com/xclarify/Metrics#MetricsOnMethods) and [C# here](http://www.ndepend.com/docs/code-metrics#ILNestingDepth) : a nesting depth of 4 or higher is complex, a nesting depth of 8 or higher is extremely complex.  
+
+With these 2 complementary metrics, we have a basis to make decisions on whether or not we should split our code into smaller, simpler functions.  
+We can also use these metrics to track our progress when refactoring a PowerShell project, to ensure we are making it more testable and maintainable. **Technical excellence is not a destination, it's a journey**. So how the numbers are changing over time is more important than the numbers themselves.
