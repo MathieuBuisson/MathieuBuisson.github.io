@@ -1,0 +1,7 @@
+_id: 71d880d0-7e7f-11e7-9335-bb081fcd1691
+message: "Hi Helmut,  \r\nThanks for pointing that out.  \r\nThe function in the article was in a simple script, but if the function under test is in a module, using InModuleScope prevents many scoping headaches !"
+name: Mathieu Buisson
+email: f31b537cb62ba1aeb81c62fabd244cef
+url: 'https://mathieubuisson.github.io'
+hidden: ''
+date: '2017-08-11T10:25:49.889Z'
