@@ -10,8 +10,6 @@ I like experimenting, exploring technologies, automating things, <del>breaking</
 The main purpose of this blog is to document the results of my experimentations.  
 Documenting this in the form of blog posts allows me to retrieve and share this information easily.  
 
-This entire site and its content are open-source, the code is available [here<i class="fa fa-fw fa-github" aria-hidden="true"></i>](https://github.com/MathieuBuisson/MathieuBuisson.github.io).  
-
 > Where does the name "**TheShellNut**" come from ?  
 
 It is a vestige from the previous incarnation of this blog : **theshellnut.com**.   
@@ -31,7 +29,7 @@ I’m a Senior DevOps Engineer at [Oneview Healthcare](http://www.oneviewhealthc
   - Software engineering and delivery  
 
 ### What fuels me :  
-  - Lots of coffee (this might be the only area of my life where quantity matters more than quality)  
+  - Coffee, lots of it (this might be the only area of my life where quantity matters more than quality)  
   - Music (here is [my coding playlist](https://open.spotify.com/user/mathieubuisson/playlist/4YxhSI2Cpwej2CEU3YxoD5))  
 
 ## Get in touch  
