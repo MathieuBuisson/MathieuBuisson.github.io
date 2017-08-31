@@ -53,12 +53,12 @@ facebook:
   username               :
   app_id                 :
   publisher              :
-og_image                 : # Open Graph/Twitter default site image
+og_image                 : /assets/images/TheShellNut_Cropped-min.jpg
 # For specifying social profiles
 # - https://developers.google.com/structured-data/customize/social-profiles
 social:
   type                   : # Person or Organization (defaults to Person)
-  name                   : # If the user or organization name differs from the site's name
+  name                   : "TheShellNut"
   links: 
     - "https://twitter.com/TheShellNut"
     - "https://github.com/MathieuBuisson"
@@ -239,6 +239,7 @@ defaults:
       comments: true
       share: true
       related: true
+      author: "TheShellNut"
   -
     scope:
       path: ""
