@@ -15,15 +15,15 @@ permalink: /search/
 
 <script>
   window.store = {
-    {% for post in site.posts %}
+    {%- for post in site.posts -%}
       "{{ post.url | slugify }}": {
         "title": "{{ post.title | xml_escape }}",
         "content": {{ post.content | strip_html | jsonify }},
         "date": "{{ post.date | date: '%m/%d/%Y' | xml_escape }}",
         "url": "{{ post.url | absolute_url }}"
       }
-      {% unless forloop.last %},{% endunless %}
-    {% endfor %}
+      {%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
   };
 </script>
 <script src='{{ "/js/lunr.min.js" | absolute_url }}'></script>

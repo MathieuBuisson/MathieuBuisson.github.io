@@ -4,12 +4,12 @@ permalink: /tags/
 title: "Posts by Topic"
 ---
 
-{% include group-by-array collection=site.posts field="tags" %}
+{%- include group-by-array collection=site.posts field="tags" -%}
 
-{% for tag in group_names %}
-  {% assign posts = group_items[forloop.index0] %}
+{%- for tag in group_names -%}
+  {%- assign posts = group_items[forloop.index0] -%}
   <h3 id="{{ tag | slugify }}" class="archive__subtitle">{{ tag }}</h3>
-  {% for post in posts %}
-    {% include archive-single.html %}
-  {% endfor %}
-{% endfor %}
+  {%- for post in posts -%}
+    {%- include archive-single.html -%}
+  {%- endfor -%}
+{%- endfor -%}

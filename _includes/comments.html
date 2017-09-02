@@ -1,16 +1,16 @@
 <div class="page__comments">
-  {% capture comments_label %}{{ site.data.ui-text[site.locale].comments_label | default: "Comments" }}{% endcapture %}
-    {% case site.comments.provider %}
-      {% when "discourse" %}
+  {%- capture comments_label -%}{{ site.data.ui-text[site.locale].comments_label | default: "Comments" }}{%- endcapture -%}
+    {%- case site.comments.provider -%}
+      {%- when "discourse" -%}
         <h4 class="page__comments-title">{{ comments_label }}</h4>
         <section id="discourse-comments"></section>
-      {% when "disqus" %}
+      {%- when "disqus" -%}
         <h4 class="page__comments-title">{{ comments_label }}</h4>
         <section id="disqus_thread"></section>
-      {% when "facebook" %}
+      {%- when "facebook" -%}
         <h4 class="page__comments-title">{{ comments_label }}</h4>
         <section class="fb-comments" data-href="{{ page.url | absolute_url }}" data-mobile="true" data-num-posts="{{ site.comments.facebook.num_posts | default: 5 }}" data-width="100%" data-colorscheme="{{ site.comments.facebook.colorscheme | default: 'light' }}"></section>
-      {% when "google-plus" %}
+      {%- when "google-plus" -%}
         <h4 class="page__comments-title">{{ comments_label }}</h4>
         <section id="g-comments" class="g-comments">Loading Google+ Comments ...</section>
         <script>
@@ -25,24 +25,24 @@
         </script>
         <script async type="text/javascript" src="https://apis.google.com/js/plusone.js" onload="initComment()" />
         <noscript>Please enable JavaScript to view the <a href="https://plus.google.com/">comments powered by Google+.</a></noscript>-->
-      {% when "staticman" %}
+      {%- when "staticman" -%}
         <section id="static-comments">
-          {% if site.repository and site.staticman.branch %}
+          {%- if site.repository and site.staticman.branch -%}
             <!-- Start static comments -->
             <div class="js-comments">
-              {% if site.data.comments[page.slug] %}
+              {%- if site.data.comments[page.slug] -%}
                 <h4 class="page__comments-title">{{ site.data.ui-text[site.locale].comments_title | default: "Comments" }}</h4>
-                {% assign comments = site.data.comments[page.slug] | sort %}
+                {%- assign comments = site.data.comments[page.slug] | sort -%}
 
-                {% for comment in comments %}
-                  {% assign email = comment[1].email %}
-                  {% assign name = comment[1].name %}
-                  {% assign url = comment[1].url %}
-                  {% assign date = comment[1].date %}
-                  {% assign message = comment[1].message %}
-                  {% include comment.html index=forloop.index email=email name=name url=url date=date message=message %}
-                {% endfor %}
-              {% endif %}
+                {%- for comment in comments -%}
+                  {%- assign email = comment[1].email -%}
+                  {%- assign name = comment[1].name -%}
+                  {%- assign url = comment[1].url -%}
+                  {%- assign date = comment[1].date -%}
+                  {%- assign message = comment[1].message -%}
+                  {%- include comment.html index=forloop.index email=email name=name url=url date=date message=message -%}
+                {%- endfor -%}
+              {%- endif -%}
             </div>
             <!-- End static comments -->
             <script src='https://www.google.com/recaptcha/api.js'></script>
@@ -92,9 +92,9 @@
               </fieldset>
             </form>
             <!-- End new comment form -->
-          {% endif %}
+          {%- endif -%}
         </section>
-      {% when "custom" %}
+      {%- when "custom" -%}
         <section id="custom-comments"></section>
-  {% endcase %}
+  {%- endcase -%}
 </div>
