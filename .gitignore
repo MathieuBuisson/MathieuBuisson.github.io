@@ -1,28 +1,20 @@
-# Mac Specific
+*.gem
+*.sublime-project
+*.sublime-workspace
+.bundle
 .DS_Store
-.AppleDouble
-.LSOverride
-
-# Icon must end with two \r
-Icon
-
-
-# Thumbnails
-._*
-
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-# Jekyll Specific
-_site/
-
-# Ruby
+.jekyll-metadata
+.sass-cache
+_asset_bundler_cache
+_site
+codekit-config.json
+example/_site
 Gemfile.lock
+node_modules
+npm-debug.log*
+
+# Ignore VS Code workspace settings
+.vscode/*
+
+# Build results
+[Bb]uildOutput/

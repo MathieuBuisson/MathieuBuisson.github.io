@@ -1,0 +1,11 @@
+# main links
+main:
+  - title: "Archives"
+    url: /archives/
+  - title: "Resources"
+    url: /resources/
+  - title: "About"
+    url: /about/
+  - title: "Search"
+    url: /search/
+    

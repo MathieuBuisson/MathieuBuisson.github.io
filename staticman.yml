@@ -1,0 +1,21 @@
+comments:
+  allowedFields          : ["name", "email", "url", "message"]
+  requiredFields         : ['name', 'email', 'message']
+  branch                 : "develop"
+  commitMessage          : "New comment !"
+  filename               : comment-{@timestamp}
+  name                   : "MathieuBuisson.github.io"
+  format                 : "yaml"
+  moderation             : true
+  path                   : "_data/comments/{options.slug}"
+  transforms:
+    email                : "md5"
+  reCaptcha:
+    enabled: true
+    siteKey: "6LfHDiwUAAAAADsLrNrJ0vTWQl58cnDap4aiy1qA"
+    secret: "jbYHt2g0X75xdOpKd5Xx6gqCr/d95Xt8Onr5k2kSB8wEj/e1czGGwsiLvkdHhNVTx7wB9viSIJvUW9JTmgijEtpXDUq9+QYu3tuQYuoYdbtu0D3hL333aci0aMSA5MGBl9Ut0W9eYMkldx5Okniabx67qrVsi613doOvhs7l+BE="
+  generatedFields:
+    date:
+      type               : "date"
+      options:
+        format           : "iso8601"
