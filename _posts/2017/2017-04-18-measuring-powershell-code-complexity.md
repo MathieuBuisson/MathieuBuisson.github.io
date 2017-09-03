@@ -1,7 +1,7 @@
 ---
 title: 'Measuring PowerShell code complexity : Why and How'
 tags: [PowerShell, Quality]
-excerpt_separator: "### "
+excerpt_separator: "<h3"
 ---
 
 ## Why does code complexity matter ?  
