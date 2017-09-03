@@ -1,7 +1,7 @@
 comments:
   allowedFields          : ["name", "email", "url", "message"]
   requiredFields         : ['name', 'email', 'message']
-  branch                 : "develop"
+  branch                 : "master"
   commitMessage          : "New comment !"
   filename               : comment-{@timestamp}
   name                   : "MathieuBuisson.github.io"
