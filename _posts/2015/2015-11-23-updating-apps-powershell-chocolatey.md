@@ -1,6 +1,7 @@
 ---
 title: Updating apps with PowerShell 5.0 and Chocolatey
 tags: [Chocolatey, PowerShell]
+excerpt_separator: "Find-Package"
 ---
 
 ## An introduction to the PackageManagement module

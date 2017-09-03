@@ -1,6 +1,7 @@
 ---
 title: Automate the discovery of mandatory parameters
 tags: [PowerShell]
+excerpt_separator: 'C:\'
 ---
 
 Sometimes, when trying out a cmdlet I rarely use, I get that :  

@@ -1,6 +1,7 @@
 ---
 title: Rebooting a server remotely
 tags: [PowerShell]
+excerpt_separator: "<h2"
 ---
 
 > "Have you tried turning it off and on again?"
