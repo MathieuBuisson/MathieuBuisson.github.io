@@ -1,6 +1,7 @@
 ---
 title: 'Measuring PowerShell code complexity : Why and How'
 tags: [PowerShell, Quality]
+excerpt_separator: "### "
 ---
 
 ## Why does code complexity matter ?  
