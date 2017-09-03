@@ -7,8 +7,8 @@ permalink: /about/
  
 I like experimenting, exploring technologies, automating things, <del>breaking</del> <ins>building</ins> tools to expand my knowledge and skills.  
 
-The main purpose of this blog is to document the results of my experimentations.  
-Documenting this in the form of blog posts allows me to retrieve and share this information easily.  
+The main purpose of this blog is to document the results of my endeavors.  
+Documenting these learnings in the form of blog posts allows me to retrieve and share them easily.  
 
 > Where does the name "**TheShellNut**" come from ?  
 
