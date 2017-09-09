@@ -18,7 +18,7 @@ permalink: /search/
     {%- for post in site.posts -%}
       "{{ post.url | slugify }}": {
         "title": "{{ post.title | xml_escape }}",
-        "content": {{ post.content | strip_html | jsonify }},
+        "content": {{ post.content | strip_html | strip_newlines | jsonify }},
         "date": "{{ post.date | date: '%m/%d/%Y' | xml_escape }}",
         "url": "{{ post.url | absolute_url }}"
       }
@@ -26,5 +26,4 @@ permalink: /search/
     {%- endfor -%}
   };
 </script>
-<script src='{{ "/js/lunr.min.js" | absolute_url }}'></script>
-<script src='{{ "/js/search.js" | absolute_url }}'></script>
+<script src='{{- "/js/lunr.min.js" | absolute_url -}}'></script><script src='{{- "/js/search.js" | absolute_url -}}'></script>

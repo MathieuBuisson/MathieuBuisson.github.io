@@ -3,9 +3,8 @@
 {%- assign tags = site.tags | sort -%}
 
 <div class="tag-cloud">
-  <p>
-  {%- for tag in tags -%}
-    {%- capture tag_word -%}{{ tag[0] | strip_newlines }}{%- endcapture -%}
+  <p>{%- for tag in tags -%}
+    {%- capture tag_word -%}{{- tag[0] | strip_newlines -}}{%- endcapture -%}
     {%- assign post_count = tag | last | size -%}
     {%- if post_count >= 15 -%}
       {%- assign size = 'extralarge' -%}
@@ -16,7 +15,7 @@
     {%- else -%}
       {%- assign size = 'small' -%}
     {%- endif -%}
-    {% capture tag_link_url %}{{ tag_word | slugify | prepend: "#" | prepend: site.tag_archive.path | absolute_url }}{% endcapture %}
+    {% capture tag_link_url %}{{- tag_word | slugify | prepend: "#" | prepend: site.tag_archive.path | absolute_url -}}{% endcapture %}
 
     <a href="{{ tag_link_url }}" class="tag-cloud-item {{ size }}" rel="tag">{{ tag_word }}</a>
   {%- endfor -%}
