@@ -19,7 +19,10 @@ At that time, the content was pretty much all about shells (PowerShell and bash)
 
 I’m `((Get-Date) - [DateTime]"03/07/1982").Days / 365` years old and I live in Ireland since 2008.  
 
-I’m a Senior DevOps Engineer at [Oneview Healthcare](http://www.oneviewhealthcare.com/).  
+I have always been a writer (in a previous life, I was a gem picker in semantic fields, etymology fabulizer and puns coiner).  
+Nowadays though, what I write is mostly code.  
+
+I’m a Senior DevOps Engineer at [Oneview Healthcare](http://www.oneviewhealthcare.com/), automating our way through the bumpy road towards *Continuous Delivery*.
 
 ### What drives me :  
   - Learning, growing, more, always  
