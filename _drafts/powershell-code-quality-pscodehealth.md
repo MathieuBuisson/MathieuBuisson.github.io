@@ -1,29 +1,34 @@
 ---
 title: 'Assessing PowerShell code quality and maintainability with PSCodeHealth'
 tags: [PowerShell, Quality]
+excerpt: "In this article, we are going to start with what we mean by 'code quality' and why it matters. Then, we'll see how PSCodeHealth can help assess the quality and maintainability of a PowerShell project."
 ---
 
 ## What is PowerShell code quality ?  
 
 Code quality is a vast subject and a somewhat subjective notion, so what we are going to cover here is my personal view on code quality **for PowerShell**, which forms the basis for `PSCodeHealth`.  
 
-Instead of engaging in potentially very long-winded and abstract discussions about what is quality, we'll focus on tangible attributes which can be observed by looking at (or parsing) the code.  
+Instead of engaging in potentially long-winded and abstract discussions about what is quality, we'll focus on tangible attributes which can be observed and reasonably quantified by analyzing the code. This list of attributes is intentionally non-exhaustive, leaning towards where `PSCodeHealth` can help.  
 
 ![WTF is quality ?]({{ "/images/powershell-code-quality-pscodehealth-wtf.png" | absolute_url }})  
 
 High-quality PowerShell code tends to have the following characteristics :  
 
-### It follows best practices
+### It follows general best practices, language guidelines and conventions
 
-For PowerShell (as for any language), the community has arrived to a consensus regarding many different practices. For example :  
+For PowerShell (as for any language), the community builds consensuses about what are considered *good* practices. For example :  
   - Avoid using aliases in scripts/modules  
   - Avoid hard-coding credentials (especially in plain text) in scripts/modules  
   - Avoid using `Write-Host`  
 
-Of course, there are exceptions to these rules but they are widely accepted as practices that should **generally** be followed. These rules exist for a reason, they prevent various kind of problems. For example, the 3 rules mentioned above help prevent the following issues, respectively :  
+Of course, there are exceptions to these rules but it is accepted that they should **generally** be followed. These rules exist for a reason, they prevent various gotchas. For example, the 3 rules mentioned above help prevent the following (respectively) :  
   - Aliases tend to be less readable and lesser known than the full command name.    
-  - Credentials in plain text can be read by anyone who read the script/module. These credentials can be reused for other purposes, potentially malicious.  
+  - Credentials in plain text can be read by anyone who can read the code and reused for other purposes, potentially malicious.  
   - There are multiple reasons **not** to use `Write-Host`, [Jeffrey Snover](http://www.jsnover.com/blog/2013/12/07/write-host-considered-harmful/), [Don Jones](http://windowsitpro.com/blog/what-do-not-do-powershell-part-1) and others have explained these reasons so I'm not going to re-hash them again here.  
+
+**Conventions are immensely helpful** : they lower the "*barrier to understanding*" for reviewers/contributors and they make developers more productive. The more developers follow them, the more useful they are. So do yourself and your community a favor : use established conventions, unless you have a documented reason not to.  
+
+To evaluate whether a piece of code follows sound practices and general language guidelines, this is where linting tools come in. In the PowerShell realm, we have [PSScriptanalyzer](https://github.com/PowerShell/PSScriptAnalyzer).  
 
 ### It follows a consistent style  
 
@@ -37,15 +42,33 @@ The main rule for these type of practices is more akin to :
 > Pick a style and stick to it.  
 
 What matters here is **consistency** across the file/module/project or across the team.  
-Consistency improves readability because anyone reading or reviewing the code can train one's eye to a given style aspects and use that to read the code more quickly.  
+Consistency improves readability because anyone reviewing the code can train one's eye to a given style aspects and use that to read the code more quickly.  
 
-On the contrary, everytime the consistency is broken (for example, an opening brace on a new line as opposed to the same line for the rest of the file), the reader is slowed down and/or confused.  
+On the contrary, every time the consistency is broken (for example, an opening brace on a new line as opposed to the same line for the rest of the file), the reader is slowed down and/or confused.  
 
-When working as part of a team, style consistency reduces the number of *not-so-obvious* and *not-so-useful* changes in source control, for example commits consisting only in :  
+When working as part of a team, style consistency reduces the number of *not-so-obvious* and *not-so-useful* changes in source control, for example, commits consisting only in :  
   - Changing a tab into 4 spaces  
-  - Adding a blank line between 2 code blocks  
+  - Adding or removing whitespace  
   - Changing a pair of double quotes into single quotes  
 
 You don't want these silly little things to delay the merging of your pull requests, do you ?  
 
+Again, a linting tool, possibly with the addition of custom rules to match a specific style guide, can help greatly in this regards.  
 
+### Single-purpose, short simple functions  
+
+#### Single-purpose  
+
+A function should do 1 thing and do it well.  
+This makes the code modular and understandable, because it organizes it into logical, single-responsibility chunks. A function is basically a named block of code and to help this tidy organization of the code, the name of a function should allow the reader to capture its purpose.  
+
+Functions should generally follow PowerShell cmdlets `Verb-Noun` naming convention and this actually helps with keeping them single-purpose. If multiple verbs could used for a function name, this function is doing more than 1 type of operations and it should be split up. If we need an "And" or many words to compose a descriptive noun for a function name, this is also a sign that the function may be doing too many things.  
+
+
+
+### Documented  
+
+### Testable and tested  
+
+
+For more information, I highly recommend reading **[Clean Code: A Handbook of Agile Software Craftsmanship](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)**. This is a fascinating deep dive into code quality fundamentals and probably the definitive reference on the subject.
