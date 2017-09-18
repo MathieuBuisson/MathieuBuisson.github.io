@@ -64,9 +64,29 @@ This makes the code modular and understandable, because it organizes it into log
 
 Functions should generally follow PowerShell cmdlets `Verb-Noun` naming convention and this actually helps with keeping them single-purpose. If multiple verbs could used for a function name, this function is doing more than 1 type of operations and it should be split up. If we need an "And" or many words to compose a descriptive noun for a function name, this is also a sign that the function may be doing too many things.  
 
+#### Short  
+
+The most obvious argument, once again, goes back to readability.  
+
+There is another argument in favor of short functions : it forces the developer to extract a lot of code into other functions, which are logically scoped, tightly focused and ... short. Also, a function which contains many calls to other functions with very intent-revealing names can read like a narrative. Human brains love narratives.  
+
+#### Simple  
 
 
 ### Documented  
+
+There is a reason I use the term "documented" and not "commented". Too much inline comments can clutter the code and can actually make it less readable.  
+Inline comments should :  
+  - Be used only when necessary  
+  - Not state the obvious  
+  - Used to explain the logic, not the syntax  
+  - Not be needed if functions and variables names communicate clearly their intent/purpose  
+
+A long descriptive name is better than a comment.  
+On the other hand, there is a place where comments belong : **comment-based help**.  
+Public functions should contains comment-based to provide the user a quick access to documentation (via `Get-Help`). Arguably, even private functions should be documented this way, for code reviewers/contributors.  
+
+Besides, comment-based help can be turn into proper documentation using a tool like [platyPS](https://github.com/PowerShell/platyPS), inline comments cannot.
 
 ### Testable and tested  
 
