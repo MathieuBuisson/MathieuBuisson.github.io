@@ -94,12 +94,13 @@ Besides, comment-based help can be turned into documentation using a tool like [
 
 Again, we are opening a Pandora's box because testing is a huge topic and has diverse, far-reaching implications. To summarize, effective `Pester` tests provide :  
   - Proof that the code works as intended/expected  
+  - **Early** detection of code defects (the later a defect is detected, the more costly (in time and money) it is to fix)  
   - Fast feedback on whether code changes are breaking existing functionality  
   - Potentially, executable specifications  
 
-There many other benefits, but essentially, it translates into **less bugs** and **more confidence**.  
+There many other benefits, but essentially, they boil down to **less code defects** and **more confidence**.  
 
-Any contributor making code changes can run the tests to know immediately if the changes are breaking existing functionality or not. This makes changing the code safer and smoother, in other words it gives **confidence**. The level of this confidence depends heavily on the **test coverage** (percentage of code which is run during the test) and `Pester` is able to measure that.  
+Any contributor making code changes can run the tests to know immediately if the changes are breaking existing functionality or not. This makes changing the code safer and smoother, it gives developers **confidence**. The level of this confidence depends very much on the **test coverage** (percentage of code which is exercised by the tests) and `Pester` is able to measure that.  
 
 Testable
 
