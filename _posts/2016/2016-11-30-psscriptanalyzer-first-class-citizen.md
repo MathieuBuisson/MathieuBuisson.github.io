@@ -3,7 +3,7 @@ title: Making PSScriptAnalyzer a first-class citizen in a PowerShell CI pipeline
 tags: [DevOps, Pester, Linting]
 ---
 
-As you already know if you have read [this]({% post_url 2016/2016-05-19-psscriptanalyzer-appveyor %}) or [this]({% post_url 2016/2016-06-27-create-custom-rule-psscriptanalyzer %}), I'm a big fan of `PSScriptAnalyzer` to maintain a certain coding standard. This is especially powerful inside a release pipeline because this allows us to enforce that coding standard.  
+As you already know if you have read [this]({{- site.url -}}{%- link _posts/2016/2016-05-19-psscriptanalyzer-appveyor.md -%}) or [this]({{- site.url -}}{%- link _posts/2016/2016-06-27-create-custom-rule-psscriptanalyzer.md -%}), I'm a big fan of `PSScriptAnalyzer` to maintain a certain coding standard. This is especially powerful inside a release pipeline because this allows us to enforce that coding standard.  
 
 In our <abbr title="Continuous Integration">CI</abbr> pipeline, we can easily make the build fail if our code violates `PSScriptAnalyzer` rule(s).  
 That's great, but the main point of [continuous integration](http://martinfowler.com/articles/continuousIntegration.html) is to give quick feedback to developers about their code change(s). It is about catching problems early **to fix them** early. So the question is :  

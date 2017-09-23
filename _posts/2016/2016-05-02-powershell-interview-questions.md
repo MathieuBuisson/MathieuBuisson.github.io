@@ -92,7 +92,7 @@ Off the top of my head, I see 3 cases where `Write-Host` makes more sense than `
 ### In a Try block, you have this code : `Format-Volume -DriveLetter 'C' -ErrorAction SilentlyContinue` What is the problem with that ?  
 
 Proper and deliberate error handling makes the difference between a script that any amateur can hack together and a professional-grade tool which can be used in production.  
-This particular question highlights two fundamental aspects of error handling in PowerShell. In fact, these are so important that I wrote [a whole blog post]({% post_url 2015/2015-09-30-erroractionpreference-try-catch %}) on this very subject.
+This particular question highlights two fundamental aspects of error handling in PowerShell. In fact, these are so important that I wrote [a whole blog post]({{- site.url -}}{% post_url 2015/2015-09-30-erroractionpreference-try-catch %}) on this very subject.
 
 This question should be pretty obvious to a good candidate. If the candidate goes in the wrong direction, emphsize that part of the question : **"inside a Try block"**. If he/she is even more confused by this hint, then he/she doesn't understand PowerShell error handling.
 

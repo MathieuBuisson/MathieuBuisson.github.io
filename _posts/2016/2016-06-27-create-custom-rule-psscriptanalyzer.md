@@ -7,7 +7,7 @@ tags:
 ---
 
 As you probably know, [PSScriptAnalyzer](https://github.com/PowerShell/PSScriptAnalyzer) is a static code analysis tool, which checks PowerShell code against rules representing best practices and style guidelines.  
-This is a fantastic tool to set coding style and quality standards, and if we want to, we can easily [enforce these standards within a build pipeline]({% post_url 2016/2016-05-19-psscriptanalyzer-appveyor %}).  
+This is a fantastic tool to set coding style and quality standards, and if we want to, we can easily [enforce these standards within a build pipeline]({{- site.url -}}{% post_url 2016/2016-05-19-psscriptanalyzer-appveyor %}).  
 
 The PowerShell community was very much involved in the definition of **PSScriptAnalyzer** rules, so these rules make sense as general guidelines and they are widely accepted by the community. However, a given project might have different or more specific coding standards.  
 Or maybe, you feel like [Richard Hendricks regarding Tabs vs Spaces](https://www.youtube.com/watch?v=SsoOG6ZeyUI).
