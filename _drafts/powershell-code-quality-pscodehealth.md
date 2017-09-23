@@ -62,7 +62,7 @@ Again, a linting tool, possibly with the addition of custom rules to match a spe
 A function should do 1 thing and do it well.  
 This makes the code modular and understandable, because it organizes it into logical, single-responsibility chunks. A function is basically a named code block and to contribute to this organization of the code, the name of a function should tell its purpose.  
 
-Functions should generally follow PowerShell cmdlets `Verb-Noun` naming convention and this helps keep them single-purpose. If multiple verbs could used for a function name, this function is doing more than 1 type of operations and it should be split up. If we need an "And" or many words to compose a descriptive noun for a function, the function is most likely doing too many things.  
+Functions should generally follow PowerShell cmdlets `Verb-Noun` naming convention and this helps keep them single-purpose. If multiple verbs could be used for a function name, this function is doing more than 1 type of operations and it should be split up. If we need an "And" or many words to compose a descriptive noun for a function, the function is most likely doing too many things.  
 
 #### Short  
 
@@ -73,25 +73,34 @@ There is another argument in favor of short functions : it forces the developer 
 #### Simple  
 
 What is a simple function ? Well, It is actually easier to define its opposite : complex.  
-So what is a complex function ? I already wrote a detailed answer to that question [here]({{- site.url -}}{%- link _posts/2017/2017-04-18-measuring-powershell-code-complexity.md -%}).
-
+So what is a complex function ? I already wrote a [detailed, PowerShell-specific answer to that question]({{- site.url -}}{%- link _posts/2017/2017-04-18-measuring-powershell-code-complexity.md -%}).  
 
 ### Documented  
 
-There is a reason I use the term "documented" and not "commented". Too much inline comments can clutter the code and can actually make it less readable.  
+There is a reason I use the term "*documented*" and not "*commented*". Too much inline comments can clutter the code and can actually make it less readable.  
 Inline comments should :  
   - Be used only when necessary  
   - Not state the obvious  
   - Used to explain the logic, not the syntax  
-  - Not be needed if functions and variables names communicate clearly their intent/purpose  
+  - Not be needed if the code is clear, idiomatic and uses intent-revealing names  
 
-A long descriptive name is better than a comment.  
+A descriptive name is better than a comment.  
 On the other hand, there is a place where comments belong : **comment-based help**.  
 Public functions should contains comment-based to provide the user a quick access to documentation (via `Get-Help`). Arguably, even private functions should be documented this way, for code reviewers/contributors.  
 
-Besides, comment-based help can be turn into proper documentation using a tool like [platyPS](https://github.com/PowerShell/platyPS), inline comments cannot.
+Besides, comment-based help can be turned into documentation using a tool like [platyPS](https://github.com/PowerShell/platyPS), inline comments cannot.
 
 ### Testable and tested  
 
+Again, we are opening a Pandora's box because testing is a huge topic and has diverse, far-reaching implications. To summarize, effective `Pester` tests provide :  
+  - Proof that the code works as intended/expected  
+  - Fast feedback on whether code changes are breaking existing functionality  
+  - Potentially, executable specifications  
+
+There many other benefits, but essentially, it translates into **less bugs** and **more confidence**.  
+
+Any contributor making code changes can run the tests to know immediately if the changes are breaking existing functionality or not. This makes changing the code safer and smoother, in other words it gives **confidence**. The level of this confidence depends heavily on the **test coverage** (percentage of code which is run during the test) and `Pester` is able to measure that.  
+
+Testable
 
 For more information, I highly recommend reading **[Clean Code: A Handbook of Agile Software Craftsmanship](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)**. This is a fascinating deep dive into code quality fundamentals and probably the definitive reference on the subject.
