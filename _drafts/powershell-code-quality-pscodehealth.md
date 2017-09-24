@@ -72,8 +72,11 @@ There is another argument in favor of short functions : it forces the developer 
 
 #### Simple  
 
-What is a simple function ? Well, It is actually easier to define its opposite : complex.  
-So what is a complex function ? I already wrote a [detailed, PowerShell-specific answer to that question]({{- site.url -}}{%- link _posts/2017/2017-04-18-measuring-powershell-code-complexity.md -%}).  
+> What is a simple function ?  
+> What is a complex function ?  
+> Why does it matter ?  
+
+Well, I already wrote a [detailed PowerShell-specific answer to these questions]({{- site.url -}}{%- link _posts/2017/2017-04-18-measuring-powershell-code-complexity.md -%}), so I invite you to take a look at it.  
 
 ### Documented  
 
@@ -92,16 +95,105 @@ Besides, comment-based help can be turned into documentation using a tool like [
 
 ### Testable and tested  
 
-Again, we are opening a Pandora's box because testing is a huge topic and has diverse, far-reaching implications. To summarize, effective `Pester` tests provide :  
+Again, we are opening a Pandora's box because testing is a huge topic and has diverse, far-reaching implications. In the context of PowerShell, testing is pretty much synonymous with [Pester](https://github.com/pester/Pester), so that's what we focus on here.  
+
+#### Tested  
+
+To summarize, effective tests provide :  
   - Proof that the code works as intended/expected  
-  - **Early** detection of code defects (the later a defect is detected, the more costly (in time and money) it is to fix)  
+  - **Early** detection of code defects (the later a defect is detected, the harder it is to fix)  
   - Fast feedback on whether code changes are breaking existing functionality  
   - Potentially, executable specifications  
 
 There many other benefits, but essentially, they boil down to **less code defects** and **more confidence**.  
 
-Any contributor making code changes can run the tests to know immediately if the changes are breaking existing functionality or not. This makes changing the code safer and smoother, it gives developers **confidence**. The level of this confidence depends very much on the **test coverage** (percentage of code which is exercised by the tests) and `Pester` is able to measure that.  
+Any contributor making code changes can run the tests to know immediately if the changes are breaking existing functionality or not. This makes changing the code easier and safer, it gives developers **confidence** and it is very beneficial to the overall maintainability.  
 
-Testable
+#### Testable  
+
+PowerShell functions which are easy to test (particularly **unit** test) have the following attributes :  
+  - Short  
+  - Simple  
+  - Tightly focused (they have a single, well-scoped responsibility)  
+  - Loosely coupled to their dependencies  
+
+Does this ring a bell ? It should, because : these attributes are also **attributes of high quality code**.  
+
+This is why thinking about the tests during code design (or before, for those into <abbr title="Test-driven development">TDD</abbr>) tends to lead to higher quality code.  
+
+Now that we are on the same page regarding the characteristics which make up PowerShell code quality and maintainability, let's look at how `PSCodeHealth` can help us measure these characteristics.  
+
+## Generating a PSCodeHealth report for a PowerShell project  
+
+[PSGithubSearch](https://github.com/MathieuBuisson/PSGithubSearch) is a cute little PowerShell module I have written a while back, but I'm concerned that its quality and maintainability may not be up to par.  
+
+Let's start by creating a `PSCodeHealth` report for all the PowerShell files (`'*.ps*1'`) in the project and store it into a variable for later use :  
+
+```powershell
+C:\PSGithubSearch> $Params = @{Path='.\PSGithubSearch\'; TestsPath='.\Tests\Unit\'; Recurse=$True}
+C:\PSGithubSearch> $HealthReport = Invoke-PSCodeHealth @Params
+C:\PSGithubSearch> $HealthReport
+
+Files    Functions        LOC (Average)    Findings (Total) Findings         Complexity       Test Coverage
+                                                            (Average)        (Average)
+-----    ---------        -------------    ---------------- ---------------- ---------------- -------------
+2        5                128.2            0                0                15.2             71.29 %
+```
+
+The default formatting view provides basic information for the overall project, but there is more :  
+
+```powershell
+C:\PSGithubSearch> $HealthReport | Select-Object -Property '*' -Exclude 'FunctionHealthRecords'
+
+
+ReportTitle                   : PSGithubSearch
+ReportDate                    : 2017-09-24 16:41:26Z
+AnalyzedPath                  : C:\PSGithubSearch\PSGithubSearch\
+Files                         : 2
+Functions                     : 5
+LinesOfCodeTotal              : 641
+LinesOfCodeAverage            : 128.2
+ScriptAnalyzerFindingsTotal   : 0
+ScriptAnalyzerErrors          : 0
+ScriptAnalyzerWarnings        : 0
+ScriptAnalyzerInformation     : 0
+ScriptAnalyzerFindingsAverage : 0
+FunctionsWithoutHelp          : 0
+NumberOfTests                 : 27
+NumberOfFailedTests           : 0
+FailedTestsDetails            :
+NumberOfPassedTests           : 27
+TestsPassRate                 : 100
+TestCoverage                  : 71.29
+CommandsMissedTotal           : 89
+ComplexityAverage             : 15.2
+ComplexityHighest             : 30
+NestingDepthAverage           : 2.4
+NestingDepthHighest           : 3
+```
+
+For more information on these metrics and which aspect(s) of quality/maintainability they attempt to quantify, please refer to [this documentation page](http://pscodehealth.readthedocs.io/en/latest/Metrics/).  
+
+This raw data is nice but a visual, dashboard-like HTML report would probably be a better starting point to understand where this project is doing well and where it needs improvement. We can do that using the `HtmlReportPath` parameter :  
+
+```powershell
+C:\PSGithubSearch> Invoke-PSCodeHealth @Params -HtmlReportPath 'C:\HealthReport.html'
+```
+
+Here is what the **Summary** tab of the report looks like :  
+
+![HTML report - Summary tab]({{ "/images/powershell-code-quality-pscodehealth-summary.png" | absolute_url }})  
+
+The **Summary** tab is just an overview, the sidebar provides access to more specific sections of the report :  
+
+![HTML report - Sidebar](https://raw.githubusercontent.com/MathieuBuisson/PSCodeHealth/master/Examples/SidebarScreenshot.png)  
+
+To see this in action, you can play with [a live version of this report]({{ "/assets/html/healthreport.html" | absolute_url }}).  
+
+
+The report's color-coding is straightforward : green means good, yellow means warning and red means danger.  
+It is designed to provide at-a-glance information about which area(s)/aspect(s) of the code need attention or improvement.  
+
+
 
 For more information, I highly recommend reading **[Clean Code: A Handbook of Agile Software Craftsmanship](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)**. This is a fascinating deep dive into code quality fundamentals and probably the definitive reference on the subject.
