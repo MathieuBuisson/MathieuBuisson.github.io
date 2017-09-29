@@ -188,8 +188,8 @@
                 </div>
                 <div class="col-sm-4 col-md-5 col-lg-4 right-header">
                     <h5>
-                        Analyzed path :<span class="right-header-data"> C:\GitHub\PSGithubSearch\PSGithubSearch\</span><br>
-                        Analysis date :<span class="right-header-data"> 2017-09-24 17:06:50Z</span>
+                        Analyzed path :<span class="right-header-data"> C:\PSGithubSearch\PSGithubSearch\</span><br>
+                        Analysis date :<span class="right-header-data"> 2017-09-29 13:27:18Z</span>
                     </h5>
                 </div>
             </div>
@@ -246,9 +246,9 @@
                             </div>
                             <table class="table">
                                 <tr class="text-success"><td>Errors</td><td>0</td></tr>
-                                <tr class="text-success"><td>Warnings</td><td>0</td></tr>
+                                <tr class="text-success"><td>Warnings</td><td>1</td></tr>
                                 <tr class="text-success"><td>Information</td><td>0</td></tr>
-                                <tr class="text-success"><td>Total</td><td>0</td></tr>
+                                <tr class="text-success"><td>Total</td><td>1</td></tr>
                             </table>
                         </div>
                     </div>
@@ -282,7 +282,7 @@
                                 <h3 class="panel-title"><i class="fa fa-plus-square-o" aria-hidden="true">&nbsp;</i> ScriptAnalyzer Findings - Total</h3>
                             </div>
                             <div class="panel-body">
-                                <h2>0</h2>
+                                <h2>1</h2>
                             </div>
                         </div>
                     </div>
@@ -302,7 +302,7 @@
                                 <h3 class="panel-title"><i class="fa fa-exclamation-triangle" aria-hidden="true">&nbsp;</i> ScriptAnalyzer Warnings</h3>
                             </div>
                             <div class="panel-body">
-                                <h2>0</h2>
+                                <h2>1</h2>
                             </div>
                         </div>
                     </div>
@@ -314,7 +314,7 @@
                                 <h3 class="panel-title"><i class="fa fa-bar-chart" aria-hidden="true">&nbsp;</i> ScriptAnalyzer Findings - Average</h3>
                             </div>
                             <div class="panel-body">
-                                <h2>0</h2>
+                                <h2>0.2</h2>
                             </div>
                         </div>
                     </div>
@@ -369,8 +369,20 @@
                                     </tr>
                                     <tr>
                                         <td>Find-GitHubIssue</td>
-                                        <td class="success">0</td>
-                                        <td class=""></td>
+                                        <td class="success">1</td>
+                                        <td class="warning">
+                                            <button type="button" class="btn btn-warning btn-sm cell-expand-collapse"> Expand</button>
+                                            <table>
+                                                 <tr>
+                                                    <td class="warning cell-largeContent">ScriptName : PSGithubSearch.psm1<br>
+Line (in the function) : 1<br>
+Severity                      : Warning<br>
+RuleName                      : PSShouldProcess<br>
+Message                       : 'Find-GitHubIssue' calls ShouldProcess/ShouldContinue but does not have the ShouldProcess attribute.<br>
+                                                    </td>
+                                                </tr>
+                                             </table>
+                                        </td>
                                         <td class="success">True</td>
                                     </tr>
                                     <tr>

@@ -147,17 +147,17 @@ C:\PSGithubSearch> $HealthReport | Select-Object -Property '*' -Exclude 'Functio
 
 
 ReportTitle                   : PSGithubSearch
-ReportDate                    : 2017-09-24 16:41:26Z
+ReportDate                    : 2017-09-29 13:23:30Z
 AnalyzedPath                  : C:\PSGithubSearch\PSGithubSearch\
 Files                         : 2
 Functions                     : 5
 LinesOfCodeTotal              : 641
 LinesOfCodeAverage            : 128.2
-ScriptAnalyzerFindingsTotal   : 0
+ScriptAnalyzerFindingsTotal   : 1
 ScriptAnalyzerErrors          : 0
-ScriptAnalyzerWarnings        : 0
+ScriptAnalyzerWarnings        : 1
 ScriptAnalyzerInformation     : 0
-ScriptAnalyzerFindingsAverage : 0
+ScriptAnalyzerFindingsAverage : 0.2
 FunctionsWithoutHelp          : 0
 NumberOfTests                 : 27
 NumberOfFailedTests           : 0
@@ -188,11 +188,86 @@ The **Summary** tab is just an overview, the sidebar provides access to more spe
 
 ![HTML report - Sidebar](https://raw.githubusercontent.com/MathieuBuisson/PSCodeHealth/master/Examples/SidebarScreenshot.png)  
 
-To see this in action, you can play with [a live version of this report]({{ "/assets/html/healthreport.html" | absolute_url }}).  
+To see it in action, you can play with [a live version of this report]({{ "/assets/html/healthreport.html" | absolute_url }}).  
 
+## Interpreting PSCodeHealth's HTML report  
 
 The report's color-coding is straightforward : green means good, yellow means warning and red means danger.  
 It is designed to provide at-a-glance information about which area(s)/aspect(s) of the code need attention or improvement.  
+
+### Style & Best Practices tab  
+
+The section of the report focuses on `PSScriptAnalyzer` findings and comment-based help.  
+There is only 1 finding in the whole project so this is fine.  
+
+### Maintainability tab  
+
+#### Functions length  
+
+The average number of lines of code per function (128.2) shows up in red, so it must be bad.  
+How bad ? The compliance rule for this metric gives us a good idea :  
+
+```powershell
+C:\PSGithubSearch> Get-PSCodeHealthComplianceRule -MetricName 'LinesOfCodeAverage'
+
+Metric Name                   Metric Group       Warning          Fail Threshold  Higher Is
+                                                 Threshold                        Better
+-----------                   ------------       ---------------- --------------  ---------------
+LinesOfCodeAverage            OverallMetrics     30               60              False
+```
+
+So this means that this metric starts to show up in yellow from 30 (lines of code per function) and in red from 60. So here, this metric is over twice the "*danger*" threshold ! This needs improvement, a lot of it.  
+
+Also, the *per function information* table tells us which particular function(s) we should focus on to improve the project's overall maintainability. 
+We can see that the most serious offender is `Find-GitHubIssue` with **219 lines of code**. Ouch !  
+
+#### Complexity  
+
+We can see that the maximum cyclomatic complexity is green, which is good, but the average is yellow. Why ?  
+
+```powershell
+C:\PSGithubSearch> Get-PSCodeHealthComplianceRule -MetricName 'ComplexityHighest','ComplexityAverage'
+
+Metric Name                   Metric Group       Warning          Fail Threshold  Higher Is
+                                                 Threshold                        Better
+-----------                   ------------       ---------------- --------------  ---------------
+ComplexityHighest             OverallMetrics     30               60              False
+ComplexityAverage             OverallMetrics     15               30              False
+```
+
+At 15.2, the average complexity is slightly above the *warning* threshold, but still, this is worth looking into. Once again, the *per function information* table points at `Find-GitHubIssue` as the main offender, so we definitely need to take a hard look at this function.  
+
+#### Nesting depth  
+
+Regarding nesting depth, all functions in the project are green, so we are good.  
+
+### Tests tab  
+
+#### Tests failures  
+
+All 27 unit tests in this project have passed, so let's move along, there's nothing to see here.  
+
+#### Tests code coverage  
+
+These tests exercise 71.29 % of the project's code. The panel containing the overall "*Test Coverage*" chart is yellow which means this metric is at *warning* level. For more information, we can look at what the compliance rule for this metric has to say about that :  
+
+```powershell
+C:\PSGithubSearch> Get-PSCodeHealthComplianceRule -MetricName 'TestCoverage' -SettingsGroup 'OverallMetrics'
+
+Metric Name                   Metric Group       Warning          Fail Threshold  Higher Is
+                                                 Threshold                        Better
+-----------                   ------------       ---------------- --------------  ---------------
+TestCoverage                  OverallMetrics     80               70              True
+```
+
+This yellow is actually dark orangish because the tests code coverage is very close to the *danger* zone.  
+
+Coverage can vary widely from 1 function to another so it is probably a good idea to look at the *Per Function Information* table to see if there are low-hanging fruits (functions for which we could easily and significantly increase the test coverage).  
+
+`Get-NumberOfPage` has only 41 % of its code exercised by unit tests. This is low, but I'm not too worried about it because it is just a private helper function and it is short and simple.  
+`Find-GitHubIssue` on the other hand is one of the 4 public functions in the module. 65 % test coverage is fairly low, but does this mean it is a low-hanging fruit ? Not necessarily because, as we have seen above, this function is huge and has a high cyclomatic complexity. Cyclomatic complexity has a strong **inverse** correlation with testability, because it tells the number of code paths that the tests need to covered.  
+
+#### Missed commands  
 
 
 
