@@ -1,10 +1,11 @@
 ---
-title: 'Assessing PowerShell code quality and maintainability with PSCodeHealth'
+title: 'How To Assess and Improve PowerShell Code Quality Using PSCodeHealth'
 tags: [PowerShell, Quality]
 excerpt: "In this article, we are going to start with what we mean by 'code quality' and why it matters. Then, we'll see how PSCodeHealth can help assess the quality and maintainability of a PowerShell project."
 ---
 
-## What is PowerShell code quality ?  
+{%- include toc -%}
+## What Is PowerShell Code Quality ?  
 
 Code quality is a vast and somewhat subjective notion, so what we cover here is my personal view on code quality **for PowerShell**, which forms the basis for `PSCodeHealth`.  
 
@@ -87,9 +88,14 @@ Inline comments should :
   - Used to explain the logic, not the syntax  
   - Not be needed if the code is clear, idiomatic and uses intent-revealing names  
 
-A descriptive name is better than a comment.  
+You don't have to take my word for it :  
+> The proper use of comments is to compensate for our failure to express ourself in code.
+
+<cite>Robert C. Martin</cite> --- Clean Code : A Handbook of Agile Software Craftsmanship
+{: .small}
+
 On the other hand, there is a place where comments belong : **comment-based help**.  
-Public functions should contains comment-based to provide the user a quick access to documentation (via `Get-Help`). Arguably, even private functions should be documented this way, for code reviewers/contributors.  
+Public functions should contains comment-based to provide the user a quick access to documentation (via `Get-Help`). Even private functions benefit from comment-based help, the only difference is that the audience is different : code reviewers, maintainers or contributors, instead of users.  
 
 Besides, comment-based help can be turned into documentation using a tool like [platyPS](https://github.com/PowerShell/platyPS), inline comments cannot.
 
@@ -123,9 +129,10 @@ This is why thinking about the tests during code design (or before, for those in
 
 Now that we are on the same page regarding the characteristics which make up PowerShell code quality and maintainability, let's look at how `PSCodeHealth` can help us measure these characteristics.  
 
-## Generating a PSCodeHealth report for a PowerShell project  
+## Generating a PSCodeHealth Report For a PowerShell Project  
 
 [PSGithubSearch](https://github.com/MathieuBuisson/PSGithubSearch) is a cute little PowerShell module I have written a while back, but I'm concerned that its quality and maintainability may not be up to par.  
+### PSCodeHealth report as a PowerShell object  
 
 Let's start by creating a `PSCodeHealth` report for all the PowerShell files (`'*.ps*1'`) in the project and store it into a variable for later use :  
 
@@ -174,6 +181,8 @@ NestingDepthHighest           : 3
 
 For more information on these metrics and which aspect(s) of quality/maintainability they attempt to quantify, please refer to [this documentation page](http://pscodehealth.readthedocs.io/en/latest/Metrics/).  
 
+### PSCodeHealth HTML report  
+
 This raw data is nice but a visual, dashboard-like HTML report would probably be a better starting point to understand where this project is doing well and where it needs improvement. We can do that using the `HtmlReportPath` parameter :  
 
 ```powershell
@@ -190,22 +199,21 @@ The **Summary** tab is just an overview, the sidebar provides access to more spe
 
 To see it in action, you can play with [a live version of this report]({{ "/assets/html/healthreport.html" | absolute_url }}).  
 
-## Interpreting PSCodeHealth's HTML report  
+## Interpreting a PSCodeHealth Report  
 
 The report's color-coding is straightforward : green means good, yellow means warning and red means danger.  
 It is designed to provide at-a-glance information about which area(s)/aspect(s) of the code need attention or improvement.  
 
 ### Style & Best Practices tab  
 
-The section of the report focuses on `PSScriptAnalyzer` findings and comment-based help.  
-There is only 1 finding in the whole project so this is fine.  
+The section of the report focuses on `PSScriptAnalyzer` findings and comment-based help. There is only 1 finding in the whole project so this is fine.  
 
 ### Maintainability tab  
 
 #### Functions length  
 
-The average number of lines of code per function (128.2) shows up in red, so it must be bad.  
-How bad ? The compliance rule for this metric gives us a good idea :  
+The average number of lines of code per function (128.2) shows up in red, so it must be bad. How bad ?  
+The compliance rule for this metric gives us a good idea :  
 
 ```powershell
 C:\PSGithubSearch> Get-PSCodeHealthComplianceRule -MetricName 'LinesOfCodeAverage'
@@ -260,15 +268,122 @@ Metric Name                   Metric Group       Warning          Fail Threshold
 TestCoverage                  OverallMetrics     80               70              True
 ```
 
-This yellow is actually dark orangish because the tests code coverage is very close to the *danger* zone.  
+This yellow is actually dark orangish because the tests code coverage is close to the *danger* zone.  
 
-Coverage can vary widely from 1 function to another so it is probably a good idea to look at the *Per Function Information* table to see if there are low-hanging fruits (functions for which we could easily and significantly increase the test coverage).  
+Coverage can vary widely from 1 function to another so it is probably a good idea to look at the *Per Function Information* table to see if there are low-hanging fruits (functions for which we could easily and significantly increase coverage).  
 
 `Get-NumberOfPage` has only 41 % of its code exercised by unit tests. This is low, but I'm not too worried about it because it is just a private helper function and it is short and simple.  
-`Find-GitHubIssue` on the other hand is one of the 4 public functions in the module. 65 % test coverage is fairly low, but does this mean it is a low-hanging fruit ? Not necessarily because, as we have seen above, this function is huge and has a high cyclomatic complexity. Cyclomatic complexity has a strong **inverse** correlation with testability, because it tells the number of code paths that the tests need to covered.  
+
+`Find-GitHubIssue` on the other hand, is a public function. 65 % test coverage is fairly low, but is that a low-hanging fruit ? I'm afraid not because, as we have seen, this function is huge and has a high cyclomatic complexity. Cyclomatic complexity has an **inverse** correlation with testability, because it tells the number of code paths that the tests need to cover.  
 
 #### Missed commands  
 
+This measures the code which is **not** covered by tests, but in absolute number rather than in percentage.  
+
+Also, because `Pester` code coverage feature uses *commands* as the unit of code (instead of *line*), that's what `PSCodeHealth` uses.  
+
+89 may look like a lot, but it is OK, as far as `PSCodeHealth` is concerned :  
+
+```powershell
+C:\PSGithubSearch> Get-PSCodeHealthComplianceRule -MetricName CommandsMissedTotal
+
+Metric Name                   Metric Group       Warning Threshold    Fail Threshold      Higher Is Better
+-----------                   ------------       -----------------    --------------      ----------------
+CommandsMissedTotal           OverallMetrics     200                  400                 False
+```
+
+This is because the compliance rule uses a 1000 *commands* project as its baseline and our current project is smaller than that. This shows that relative metrics (in percentage) are generally more meaningful.  
+So let's move on, we have work to do.  
+
+Now that we know which aspects and sections of code affect the project's quality and maintainability, we can do 2 things with this information :  
+  - Use it to guide our code refactoring efforts  
+  - Ignore it or customize it to our project's metrics goals/requirements  
+
+## Using PSCodeHealth To Improve Code Quality and Track Our Progress  
+
+The HTML report made it very clear that the functions in this project are too long. It also made the function `Find-GitHubIssue` stick out like a sore thumb, so this is where we'll start our refactoring endeavor.  
+
+At the beginning of the function, we see this :  
+
+```powershell
+    [string]$QueryString = 'q='
+    $EmptyQueryString = $True
+
+    If ( $Keywords ) {
+        $QueryString += ($Keywords -join '+')
+        $EmptyQueryString = $False
+    }
+    If ( $Type ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'type:' + $Type
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+type:' + $Type
+        }
+    }
+    If ( $In ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'in:' + $In
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+in:' + $In
+        }
+    }
+    If ( $Author ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'author:' + $Author
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+author:' + $Author
+        }
+    }
+    If ( $Assignee ) {
+        If ( $EmptyQueryString ) {
+            $QueryString += 'assignee:' + $Assignee
+            $EmptyQueryString = $False
+        }
+        Else {
+            $QueryString += '+assignee:' + $Assignee
+        }
+    }
+    ... 
+    ...
+```
+
+This doesn't even show everything, this list of `If` statements goes on and on...  
+What a convoluted way of building a query string ! This section of code alone, represent 121 lines of code and a cyclomatic complexity of 26. On top of that, to build this query string it is using a concatenation operator (`+=`). Every. Single. Time.  
+Which is inefficient.  
 
 
-For more information, I highly recommend reading **[Clean Code: A Handbook of Agile Software Craftsmanship](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)**. This is a fascinating deep dive into code quality fundamentals and probably the definitive reference on the subject.
+Let's generate a new `PSCodeHealth` report to quantify the improvement made to this function :  
+
+```powershell
+C:\PSGithubSearch> $NewReport = Invoke-PSCodeHealth @Params
+C:\PSGithubSearch> $IssueFunction = $NewReport.FunctionHealthRecords.Where( {$_.FunctionName -eq 'Find-GithubIssue'} )
+C:\PSGithubSearch> $IssueFunction | fl *
+
+FunctionName                : Find-GitHubIssue
+FilePath                    : C:\PSGithubSearch\PSGithubSearch\PSGithubSearch.psm1
+LinesOfCode                 : 130
+ScriptAnalyzerFindings      : 0
+ScriptAnalyzerResultDetails :
+ContainsHelp                : True
+TestCoverage                : 87.5
+CommandsMissed              : 7
+Complexity                  : 12
+MaximumNestingDepth         : 2
+```
+
+We have ruthlessly axed almost 100 lines of code from this function, it feels good.  
+
+Initially, the cyclomatic complexity of this function was 30. By removing a large number of silly `If` and `Else` statements, we reduced it to 12. This is a massive improvement.  
+
+
+
+
+## Customizing PSCodeHealth To Our Metrics Goals or Requirements  
+
+For more information, I highly recommend **[Clean Code: A Handbook of Agile Software Craftsmanship](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)**. This dives into the fundamentals of building high quality, maintainable code.
