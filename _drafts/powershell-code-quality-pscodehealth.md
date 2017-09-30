@@ -7,7 +7,7 @@ excerpt: "In this article, we are going to start with what we mean by 'code qual
 {%- include toc -%}
 ## What Is PowerShell Code Quality ?  
 
-Code quality is a vast and somewhat subjective notion, so what we cover here is my personal view on code quality **for PowerShell**, which forms the basis for `PSCodeHealth`.  
+Code quality is a vast and somewhat subjective notion, so what we cover here is **my** take on code quality **for PowerShell**, which forms the basis for `PSCodeHealth`.  
 
 Instead of engaging in long-winded and abstract discussions about what is quality, we'll focus on tangible attributes which can be observed and reasonably quantified by analyzing the code. This list of attributes is intentionally leaning to where `PSCodeHealth` can help.  
 
