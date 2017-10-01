@@ -7,9 +7,9 @@ excerpt: "In this article, we are going to start with what we mean by 'code qual
 {%- include toc -%}
 ## What Is PowerShell Code Quality ?  
 
-Code quality is a vast and somewhat subjective notion, so what we cover here is **my** take on code quality **for PowerShell**, which forms the basis for `PSCodeHealth`.  
+Code quality is a vast and somewhat subjective notion, so what we cover here is **my** take on code quality **for PowerShell** and more specifically, the parts which underpin `PSCodeHealth`.  
 
-Instead of engaging in long-winded and abstract discussions about what is quality, we'll focus on tangible attributes which can be observed and reasonably quantified by analyzing the code. This list of attributes is intentionally leaning to where `PSCodeHealth` can help.  
+Instead of engaging in an abstract debate on what is quality, we'll focus on attributes which can be observed and reasonably quantified by analyzing the code. This list of attributes is intentionally leaning to where `PSCodeHealth` can help.  
 
 ![WTF is quality ?]({{ "/images/powershell-code-quality-pscodehealth-wtf.png" | absolute_url }})  
 
@@ -17,15 +17,16 @@ High-quality PowerShell code tends to have the following characteristics :
 
 ### It follows general best practices, language guidelines and conventions
 
-For PowerShell (as for any language), the community builds consensuses about what are considered *good* practices. For example :  
+For any given language/framework, communities build consensuses about what are considered *good* practices. For PowerShell, these include :  
   - Avoid using aliases in scripts/modules  
   - Avoid hard-coding credentials (especially in plain text) in scripts/modules  
   - Avoid using `Write-Host`  
 
-Of course, there are exceptions to these rules but it is accepted that they should **generally** be followed. These rules exist for a reason, they prevent various gotchas. For example, the 3 rules mentioned above help prevent the following (respectively) :  
+Of course, there are exceptions to these rules but it is accepted that they should **generally** be followed. These rules exist for a reason, they prevent gotchas. For example, the 3 rules mentioned above help prevent the following (respectively) :  
+
   - Aliases tend to be less readable and lesser known than the full command name.    
   - Credentials in plain text can be read by anyone who can read the code and reused for malicious purposes.  
-  - There are multiple reasons **not** to use `Write-Host`, [Jeffrey Snover](http://www.jsnover.com/blog/2013/12/07/write-host-considered-harmful/), [Don Jones](http://windowsitpro.com/blog/what-do-not-do-powershell-part-1) and others have explained these reasons so I'm not going to rehash them again here.  
+  - There are multiple reasons **not** to use `Write-Host`, [Jeffrey Snover](http://www.jsnover.com/blog/2013/12/07/write-host-considered-harmful/), [Don Jones](http://windowsitpro.com/blog/what-do-not-do-powershell-part-1) and others have explained these reasons.  
 
 **Conventions are immensely helpful** : they lower the "*barrier to understanding*" for reviewers/contributors and they make developers more productive. The more developers follow them, the more useful they are. So do yourself and the community a favor : use established conventions, unless you have a documented reason not to.  
 
@@ -45,7 +46,7 @@ The main rule for these type of practices is more akin to :
 What matters here is **consistency** across a given file, module, project or team.  
 Consistency improves readability because anyone reviewing the code can train one's eye to a given style aspects and use that to read the code more quickly.  
 
-On the contrary, every time the consistency is broken (for example, an opening brace on a new line as opposed to the same line for the rest of the file), the reader is slowed down and/or confused.  
+Any exception to the consistent use of a given style practice will confuse, or at best, slow down the reader.  
 
 When working as part of a team, style consistency reduces the number of *not-so-obvious* and *not-so-useful* changes in source control, for example, commits consisting only in :  
   - Changing a tab into 4 spaces  
@@ -54,22 +55,23 @@ When working as part of a team, style consistency reduces the number of *not-so-
 
 You don't want these silly little things to delay the merging of your pull requests, do you ?  
 
-Again, a linting tool, possibly with the addition of custom rules to match a specific style guide, can help greatly in this regards.  
+Again, a linting tool, possibly with the addition of custom rules to match a specific style guide, can help greatly.  
 
 ### Single-purpose, short simple functions  
 
 #### Single-purpose  
 
 A function should do 1 thing and do it well.  
+
 This makes the code modular and understandable, because it organizes it into logical, single-responsibility chunks. A function is basically a named code block and to contribute to this organization of the code, the name of a function should tell its purpose.  
 
-Functions should generally follow PowerShell cmdlets `Verb-Noun` naming convention and this helps keep them single-purpose. If multiple verbs could be used for a function name, this function is doing more than 1 type of operations and it should be split up. If we need an "And" or many words to compose a descriptive noun for a function, the function is most likely doing too many things.  
+Functions should generally follow PowerShell cmdlets `Verb-Noun` naming convention and this helps keep them single-purpose. If multiple verbs could be used for a function name, this function is doing more than 1 type of operations and it should be split up. If we need an "And" or many words to compose a descriptive noun for a function, it is most likely doing too many things.  
 
 #### Short  
 
 The most obvious argument goes back to readability.  
 
-There is another argument in favor of short functions : it forces the developer to extract a lot of code into other functions, which are logically scoped, tightly focused and ... short. Also, a function containing many calls to other functions with intent-revealing names can read like a narrative. We all love a good story, right ?  
+There is another argument in favor of short functions : it forces the developers to extract a lot of code into other functions, which are logically scoped, tightly focused and ... short. Also, a function containing many calls to other functions with intent-revealing names can read like a narrative. We all love a good story, right ?  
 
 #### Simple  
 
@@ -95,9 +97,7 @@ You don't have to take my word for it :
 {: .small}
 
 On the other hand, there is a place where comments belong : **comment-based help**.  
-Public functions should contains comment-based to provide the user a quick access to documentation (via `Get-Help`). Even private functions benefit from comment-based help, the only difference is that the audience is different : code reviewers, maintainers or contributors, instead of users.  
-
-Besides, comment-based help can be turned into documentation using a tool like [platyPS](https://github.com/PowerShell/platyPS), inline comments cannot.
+Public functions should contains comment-based to provide the user a quick access to documentation (via `Get-Help`). Even private functions benefit from comment-based help, the only difference is the audience : code reviewers, maintainers or contributors instead of users.  
 
 ### Testable and tested  
 
@@ -109,11 +109,10 @@ To summarize, effective tests provide :
   - Proof that the code works as intended/expected  
   - **Early** detection of code defects (the later a defect is detected, the harder it is to fix)  
   - Fast feedback on whether code changes are breaking existing functionality  
-  - Potentially, executable specifications  
 
-There many other benefits, but essentially, they boil down to **less code defects** and **more confidence**.  
+There many other benefits, but essentially, they boil down to **less defects** and **more confidence**.  
 
-Any contributor making code changes can run the tests to know immediately if the changes are breaking existing functionality or not. This makes changing the code easier and safer, it gives developers **confidence** and it is very beneficial to the overall maintainability.  
+Anyone making code changes can run the tests to know immediately if the changes are breaking existing functionality or not. This makes **changing code easier and safer**, which is ultimately what maintainability is all about.  
 
 #### Testable  
 
@@ -131,7 +130,7 @@ Now that we are on the same page regarding the characteristics which make up Pow
 
 ## Generating a PSCodeHealth Report For a PowerShell Project  
 
-[PSGithubSearch](https://github.com/MathieuBuisson/PSGithubSearch) is a cute little PowerShell module I have written a while back, but I'm concerned that its quality and maintainability may not be up to par.  
+[PSGithubSearch](https://github.com/MathieuBuisson/PSGithubSearch) is a cute little PowerShell module I wrote a while back, but I'm concerned about its quality and maintainability, so we are going to use it as an example.  
 ### PSCodeHealth report as a PowerShell object  
 
 Let's start by creating a `PSCodeHealth` report for all the PowerShell files (`'*.ps*1'`) in the project and store it into a variable for later use :  
@@ -179,11 +178,11 @@ NestingDepthAverage           : 2.4
 NestingDepthHighest           : 3
 ```
 
-For more information on these metrics and which aspect(s) of quality/maintainability they attempt to quantify, please refer to [this documentation page](http://pscodehealth.readthedocs.io/en/latest/Metrics/).  
+For more information on these metrics and which aspects of quality they attempt to quantify, please refer to [this documentation page](http://pscodehealth.readthedocs.io/en/latest/Metrics/).  
 
 ### PSCodeHealth HTML report  
 
-This raw data is nice but a visual, dashboard-like HTML report would probably be a better starting point to understand where this project is doing well and where it needs improvement. We can do that using the `HtmlReportPath` parameter :  
+This raw data is nice but a *dashboard-like* HTML report would probably be a nicer way of viewing where this project is doing well and where it needs improvement. We can do that using the `HtmlReportPath` parameter :  
 
 ```powershell
 C:\PSGithubSearch> Invoke-PSCodeHealth @Params -HtmlReportPath 'C:\HealthReport.html'
@@ -201,8 +200,12 @@ To see it in action, you can play with [a live version of this report]({{ "/asse
 
 ## Interpreting a PSCodeHealth Report  
 
-The report's color-coding is straightforward : green means good, yellow means warning and red means danger.  
-It is designed to provide at-a-glance information about which area(s)/aspect(s) of the code need attention or improvement.  
+The report's color-coding is straightforward :  
+  - Green means good  
+  - Yellow means warning  
+  - Red means danger  
+
+It is designed to provide at-a-glance information about which aspects and sections of the code need attention or improvement.  
 
 ### Style & Best Practices tab  
 
@@ -226,7 +229,7 @@ LinesOfCodeAverage            OverallMetrics     30               60            
 
 So this means that this metric starts to show up in yellow from 30 (lines of code per function) and in red from 60. So here, this metric is over twice the "*danger*" threshold ! This needs improvement, a lot of it.  
 
-Also, the *per function information* table tells us which particular function(s) we should focus on to improve the project's overall maintainability. 
+Also, the *Per Function Information* table tells us which particular function(s) we should focus on to improve the project's overall maintainability. 
 We can see that the most serious offender is `Find-GitHubIssue` with **219 lines of code**. Ouch !  
 
 #### Complexity  
@@ -243,7 +246,7 @@ ComplexityHighest             OverallMetrics     30               60            
 ComplexityAverage             OverallMetrics     15               30              False
 ```
 
-At 15.2, the average complexity is slightly above the *warning* threshold, but still, this is worth looking into. Once again, the *per function information* table points at `Find-GitHubIssue` as the main offender, so we definitely need to take a hard look at this function.  
+At 15.2, the average complexity is slightly above the *warning* threshold, but still, this is worth looking into. Once again, the *Per Function Information* table points at `Find-GitHubIssue` as the main offender, so we definitely need to take a hard look at this function.  
 
 #### Nesting depth  
 
@@ -257,7 +260,7 @@ All 27 unit tests in this project have passed, so let's move along, there's noth
 
 #### Tests code coverage  
 
-These tests exercise 71.29 % of the project's code. The panel containing the overall "*Test Coverage*" chart is yellow which means this metric is at *warning* level. For more information, we can look at what the compliance rule for this metric has to say about that :  
+These tests exercise 71.29 % of the project's code. The panel containing the overall "*Test Coverage*" chart is yellow which means this metric is at *warning* level. For more information, we can look at what the compliance rule has to say about that :  
 
 ```powershell
 C:\PSGithubSearch> Get-PSCodeHealthComplianceRule -MetricName 'TestCoverage' -SettingsGroup 'OverallMetrics'
@@ -274,13 +277,13 @@ Coverage can vary widely from 1 function to another so it is probably a good ide
 
 `Get-NumberOfPage` has only 41 % of its code exercised by unit tests. This is low, but I'm not too worried about it because it is just a private helper function and it is short and simple.  
 
-`Find-GitHubIssue` on the other hand, is a public function. 65 % test coverage is fairly low, but is that a low-hanging fruit ? I'm afraid not because, as we have seen, this function is huge and has a high cyclomatic complexity. Cyclomatic complexity has an **inverse** correlation with testability, because it tells the number of code paths that the tests need to cover.  
+`Find-GitHubIssue` on the other hand, is a public function. 65 % test coverage is fairly low, but is that a low-hanging fruit ? I'm afraid not because, as we have seen, this function is huge and has a high cyclomatic complexity. This metric has an **inverse** correlation with testability, because it tells the number of code paths that tests need to cover.  
 
 #### Missed commands  
 
-This measures the code which is **not** covered by tests, but in absolute number rather than in percentage.  
+This measures the code which is **not covered** by tests, but in absolute number rather than in percentage.  
 
-Also, because `Pester` code coverage feature uses *commands* as the unit of code (instead of *line*), that's what `PSCodeHealth` uses.  
+Also, because `Pester` code coverage feature uses *commands* as the unit of code (instead of *lines*), that's what `PSCodeHealth` uses.  
 
 89 may look like a lot, but it is OK, as far as `PSCodeHealth` is concerned :  
 
@@ -293,15 +296,14 @@ CommandsMissedTotal           OverallMetrics     200                  400       
 ```
 
 This is because the compliance rule uses a 1000 *commands* project as its baseline and our current project is smaller than that. This shows that relative metrics (in percentage) are generally more meaningful.  
-So let's move on, we have work to do.  
 
-Now that we know which aspects and sections of code affect the project's quality and maintainability, we can do 2 things with this information :  
-  - Use it to guide our code refactoring efforts  
-  - Ignore it or customize it to our project's metrics goals/requirements  
+Now that we know which aspects and sections of code affect the project's quality and maintainability, we can use this information as a guide when improving its code.  
 
 ## Using PSCodeHealth To Improve Code Quality and Track Our Progress  
 
 The HTML report made it very clear that the functions in this project are too long. It also made the function `Find-GitHubIssue` stick out like a sore thumb, so this is where we'll start our refactoring endeavor.  
+
+### A refactoring example  
 
 At the beginning of the function, we see this :  
 
@@ -354,11 +356,75 @@ At the beginning of the function, we see this :
 ```
 
 This doesn't even show everything, this list of `If` statements goes on and on...  
-What a convoluted way of building a query string ! This section of code alone, represent 121 lines of code and a cyclomatic complexity of 26. On top of that, to build this query string it is using a concatenation operator (`+=`). Every. Single. Time.  
+What a convoluted way of building a query string ! This section of code alone, represent 121 lines of code and a cyclomatic complexity of 26.  
+
+On top of that, to build this query string it is using a concatenation operator (`+=`). Every. Single. Time.  
 Which is inefficient.  
 
+Each variable tested in these `If` statements is used to build a search qualifier string. Almost all of these are built using the same pattern : variable name in lower case + ':' + variable value.  
+So we should be able to leverage this pattern against a collection of variables, instead of one at a time, to reduce repetition.  
 
-Let's generate a new `PSCodeHealth` report to quantify the improvement made to this function :  
+Also, all these variables are coming from the function parameters, so we can use `$PSBoundParameters`. And because they don't have a default value, we know that if they are not in `$PSBoundParameters`, they are `Null`. This means we don't need to check for `Null` and can get rid of all these `If` :  
+
+```powershell
+If ( $Variable ) {
+    ...
+}
+```
+
+First, we remove the parameters used by search qualifiers not following the pattern identified above (`$Keywords`, `$Labels` and `$SortBy`) :  
+
+```powershell
+If ( $PSBoundParameters.ContainsKey('Keywords') ) {
+    $Null = $PSBoundParameters.Remove('Keywords')
+}
+If ( $PSBoundParameters.ContainsKey('Labels') ) {
+    $Null = $PSBoundParameters.Remove('Labels')
+}
+If ( $PSBoundParameters.ContainsKey('SortBy') ) {
+    $Null = $PSBoundParameters.Remove('SortBy')
+}
+```
+
+Now, we can generalize our pattern to build the search qualifier strings :  
+
+```powershell
+[System.Collections.ArrayList]$JoinableFilterStrings = @()
+Foreach ( $ParamName in $PSBoundParameters.Keys ) {
+    
+    $JoinableFilterString = '{0}:{1}' -f $ParamName.ToLower(), $PSBoundParameters[$ParamName]
+    $Null = $JoinableFilterStrings.Add($JoinableFilterString)
+}
+```
+
+Also, each if the original `If` statements have a nested `If/Else` :  
+
+```powershell
+If ( $EmptyQueryString ) {
+    $QueryString += 'variable:' + $Variable
+    $EmptyQueryString = $False
+}
+Else {
+    $QueryString += '+variable:' + $Variable
+}
+```
+
+This checks if the query string is empty or not to determine if we need to prefix the search qualifier with a `+`. This is done every single time.  
+
+To get rid of these repetitive checks, we can use the `join` operator with the `+` separator :  
+
+```powershell
+$JoinedFilterStrings = If ($JoinableFilterStrings.Count -gt 0) {$JoinableFilterStrings -join '+'}
+$JoinedFilter = ($KeywordFilter, $JoinedFilterStrings, $LabelsFilter -join '+').Trim('+')
+```
+
+`$KeywordFilter` and `$LabelsFilter` are built prior to the `$JoinableFilterStrings` because they are built from a different pattern.  
+
+We join them with `$JoinableFilterStrings` even if they are `Null` or empty. In that case, the joined string would have a leading and/or trailing `'+'`. This is easily solved with the `Trim` method. No need for `Null` checks and these numerous `If/Else` anymore.  
+
+### Quantifying the improvement  
+
+Now, we can generate a new `PSCodeHealth` report to verify the progress we've made :  
 
 ```powershell
 C:\PSGithubSearch> $NewReport = Invoke-PSCodeHealth @Params
@@ -379,11 +445,7 @@ MaximumNestingDepth         : 2
 
 We have ruthlessly axed almost 100 lines of code from this function, it feels good.  
 
-Initially, the cyclomatic complexity of this function was 30. By removing a large number of silly `If` and `Else` statements, we reduced it to 12. This is a massive improvement.  
+Initially, the cyclomatic complexity of this function was 30. By removing a large number of repetitive `If` and `Else` statements, we reduced it to 12.  
 
+Interestingly, this led to a massive boost to the test coverage (87.5 %). The exact same unit tests are covering much more code in that function. The main reason is that we have greatly reduced the number of code paths, so the tests have fewer paths to cover. This is a great example of the relationships between different types of metrics, in this case : **cyclomatic complexity** and **tests code coverage**.  
 
-
-
-## Customizing PSCodeHealth To Our Metrics Goals or Requirements  
-
-For more information, I highly recommend **[Clean Code: A Handbook of Agile Software Craftsmanship](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)**. This dives into the fundamentals of building high quality, maintainable code.
