@@ -11,7 +11,7 @@ Code quality is a vast and somewhat subjective notion, so what we cover here is 
 
 Instead of engaging in an abstract debate on what is quality, we'll focus on attributes which can be observed and reasonably quantified by analyzing the code. This list of attributes is intentionally leaning to where `PSCodeHealth` can help.  
 
-![WTF is quality ?]({{ "/images/powershell-code-quality-pscodehealth-wtf.png" | absolute_url }})  
+![WTF is quality ?]({{ "/images/2017-10-04-powershell-code-quality-pscodehealth-wtf.png" | absolute_url }})  
 
 High-quality PowerShell code tends to have the following characteristics :  
 
@@ -190,7 +190,7 @@ C:\PSGithubSearch> Invoke-PSCodeHealth @Params -HtmlReportPath 'C:\HealthReport.
 
 Here is what the **Summary** tab of the report looks like :  
 
-![HTML report - Summary tab]({{ "/images/powershell-code-quality-pscodehealth-summary.png" | absolute_url }})  
+![HTML report - Summary tab]({{ "/images/2017-10-04-powershell-code-quality-pscodehealth-summary.png" | absolute_url }})  
 
 The **Summary** tab is just an overview, the sidebar provides access to more specific sections of the report :  
 
@@ -227,9 +227,9 @@ Metric Name                   Metric Group       Warning          Fail Threshold
 LinesOfCodeAverage            OverallMetrics     30               60              False
 ```
 
-So this means that this metric starts to show up in yellow from 30 (lines of code per function) and in red from 60. So here, this metric is over twice the "*danger*" threshold ! This needs improvement, a lot of it.  
+So this means that this metric starts to show up in yellow from 30 (lines of code per function) and in red from 60. This metric is over twice the "*danger*" threshold ! This needs improvement, a lot of it.  
 
-Also, the *Per Function Information* table tells us which particular function(s) we should focus on to improve the project's overall maintainability. 
+The *Per Function Information* table tells us which particular function(s) we should focus on to improve the project's overall maintainability. 
 We can see that the most serious offender is `Find-GitHubIssue` with **219 lines of code**. Ouch !  
 
 #### Complexity  
@@ -256,7 +256,7 @@ Regarding nesting depth, all functions in the project are green, so we are good.
 
 #### Tests failures  
 
-All 27 unit tests in this project have passed, so let's move along, there's nothing to see here.  
+All 27 unit tests in this project have passed, so let's move along.  
 
 #### Tests code coverage  
 
@@ -358,10 +358,10 @@ At the beginning of the function, we see this :
 This doesn't even show everything, this list of `If` statements goes on and on...  
 What a convoluted way of building a query string ! This section of code alone, represent 121 lines of code and a cyclomatic complexity of 26.  
 
-On top of that, to build this query string it is using a concatenation operator (`+=`). Every. Single. Time.  
-Which is inefficient.  
+On top of that, to build this query string it is using a concatenation operator (`+=`). Every. Single. Time. Which is inefficient.  
 
-Each variable tested in these `If` statements is used to build a search qualifier string. Almost all of these are built using the same pattern : variable name in lower case + ':' + variable value.  
+Each variable tested in these `If` statements is used to build a search qualifier string. Almost all of these are built using the same pattern :  
+variable name in lower case + ':' + variable value.  
 So we should be able to leverage this pattern against a collection of variables, instead of one at a time, to reduce repetition.  
 
 Also, all these variables are coming from the function parameters, so we can use `$PSBoundParameters`. And because they don't have a default value, we know that if they are not in `$PSBoundParameters`, they are `Null`. This means we don't need to check for `Null` and can get rid of all these `If` :  
@@ -386,7 +386,7 @@ If ( $PSBoundParameters.ContainsKey('SortBy') ) {
 }
 ```
 
-Now, we can generalize our pattern to build the search qualifier strings :  
+Then, we use the pattern against all the remaining parameters to build search qualifier strings :  
 
 ```powershell
 [System.Collections.ArrayList]$JoinableFilterStrings = @()
@@ -409,9 +409,9 @@ Else {
 }
 ```
 
-This checks if the query string is empty or not to determine if we need to prefix the search qualifier with a `+`. This is done every single time.  
+This checks whether the query string is empty to determine if we need to prefix the search qualifier with a `'+'`. Every. Single. Time.  
 
-To get rid of these repetitive checks, we can use the `join` operator with the `+` separator :  
+To get rid of these repetitive checks, we can use the `join` operator with the `'+'` separator :  
 
 ```powershell
 $JoinedFilterStrings = If ($JoinableFilterStrings.Count -gt 0) {$JoinableFilterStrings -join '+'}
@@ -424,11 +424,11 @@ We join them with `$JoinableFilterStrings` even if they are `Null` or empty. In 
 
 ### Quantifying the improvement  
 
-Now, we can generate a new `PSCodeHealth` report to verify the progress we've made :  
+Now, we can generate a new `PSCodeHealth` report and verify the progress we've made :  
 
 ```powershell
 C:\PSGithubSearch> $NewReport = Invoke-PSCodeHealth @Params
-C:\PSGithubSearch> $IssueFunction = $NewReport.FunctionHealthRecords.Where( {$_.FunctionName -eq 'Find-GithubIssue'} )
+C:\PSGithubSearch> $IssueFunction = $NewReport.FunctionHealthRecords.Where({$_.FunctionName -eq 'Find-GithubIssue'})
 C:\PSGithubSearch> $IssueFunction | fl *
 
 FunctionName                : Find-GitHubIssue
@@ -447,5 +447,29 @@ We have ruthlessly axed almost 100 lines of code from this function, it feels go
 
 Initially, the cyclomatic complexity of this function was 30. By removing a large number of repetitive `If` and `Else` statements, we reduced it to 12.  
 
-Interestingly, this led to a massive boost to the test coverage (87.5 %). The exact same unit tests are covering much more code in that function. The main reason is that we have greatly reduced the number of code paths, so the tests have fewer paths to cover. This is a great example of the relationships between different types of metrics, in this case : **cyclomatic complexity** and **tests code coverage**.  
+Interestingly, this led to a substantial boost in test coverage (87.5 %). The exact same unit tests are now covering more code in that function. The main reason is that we have greatly reduced the number of code paths, so the tests have fewer paths to cover. This is a great example of the relationships between different types of metrics, in this case : **cyclomatic complexity** and **tests code coverage**.  
 
+Of course, there is a lot more refactoring work to be done, for example :  
+  - Extract this whole query string building logic into a separate function  
+  - Reuse the same query string building logic in the other functions  
+  - Extract the handling of the API requests throttling into a separate function  
+  - Reuse the function handling the API requests throttling from the other functions  
+
+These refactoring decisions and the work required to make them happen are still the developer's responsibility. `PSCodeHealth` is just a tool to provide some guidance about where to focus and to help quantify improvements of the code.  
+
+{% capture notice-text %}
+There is no perfect metric. Any metric can be gamed one way or another.  
+So the focus should not be on improving metrics for the sake of improving metrics, but improving what they attempt to measure.{% endcapture %}
+
+<div class="notice--warning">
+  <h4>Metrics have limitations :</h4>
+  {{ notice-text | markdownify }}
+</div>
+
+## Conclusion  
+
+`PSCodeHealth` is considered stable, but not necessarily feature-complete. If there are additional metrics and features you would like to see, the preferred feedback channel is [GitHub issues](https://github.com/MathieuBuisson/PSCodeHealth/issues), but any type of feedback is welcome to make this tool more useful to more people.  
+
+Also, you might disagree with the tool's default *warning* and/or *danger* thresholds for some metrics. This is perfectly fine, an upcoming article will show how to customize metrics rules to your project's goals or requirements, and use this as a **quality gate** in a PowerShell release pipeline.  
+
+The easiest way to install `PSCodeHealth` is [the PowerShell Gallery](https://www.powershellgallery.com/packages/PSCodeHealth/) and you can get [the code from GitHub](https://github.com/MathieuBuisson/PSCodeHealth). For more information on how to use this tool and its features, check out the [fairly extensive documentation](http://pscodehealth.readthedocs.io/en/latest/).  
