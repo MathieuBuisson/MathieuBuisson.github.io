@@ -2,6 +2,8 @@
 title: 'How To Assess and Improve PowerShell Code Quality Using PSCodeHealth'
 tags: [PowerShell, Quality]
 excerpt: "In this article, we are going to start with what we mean by 'code quality' and why it matters. Then, we'll see how PSCodeHealth can help assess the quality and maintainability of a PowerShell project."
+header:
+  teaser: "https://raw.githubusercontent.com/MathieuBuisson/PSCodeHealth/master/Examples/SidebarScreenshot.png"
 ---
 
 {%- include toc -%}
