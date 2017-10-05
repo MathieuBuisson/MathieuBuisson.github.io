@@ -59,7 +59,7 @@ You don't want these silly little things to delay the merging of your pull reque
 
 Again, a linting tool, possibly with the addition of custom rules to match a specific style guide, can help greatly.  
 
-### Single-purpose, short simple functions  
+### Single-purpose, short, simple functions  
 
 #### Single-purpose  
 
