@@ -1,0 +1,7 @@
+_id: 741d2100-b1c1-11e7-b553-d17830342549
+message: "While I agree that functions should be single purpose, which would encourage small functions, I do not agree with using an arbitrary number of lines to measure it.  Such a threshold assumes that a single purpose function will be under the threshold.\r\n\r\nIn addition, many styles for readability increase the number of lines in a function.  Splatting is one.  Another example is when you are calling a function within your function that has many parameters, you would have a line per parameter.  An arbitrary threshold potentially encourages sacrificing readability.\r\n\r\nAnother potential side effect is unnatural division of functions that make it difficult to determine what the functions are doing.  Although, this is very rare.  Most tend to add everything we can into a function.\r\n\r\nAs for the question on how to measure single purpose and small functions, I don't have a good solution that would be scripted.  It would require some kind of AI.  Although, I am a strong supporter for scripting, I believe the better solution is still peer code review.  But, that doesn't stop me from looking for a way to script it."
+name: Robert Eder
+email: 1177b949858a7fa2a119074086ec76e5
+url: ''
+hidden: ''
+date: '2017-10-15T15:56:49.936Z'
