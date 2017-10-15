@@ -11,7 +11,7 @@ In [the previous article]({{- site.url -}}{%- link _posts/2017/2017-10-04-powers
 
 `PSCodeHealth` collects quite a few metrics to quantify some aspects of code quality and most of these have **compliance rules** associated to them. The purpose of compliance rules is to tell, for a specific metric, how *good* or how *bad* it is.  
 
-## PSCodeHealth's default compliance rules  
+## PSCodeHealth's Default Compliance Rules  
 
 First, to view all the compliance rules, we can use the command `Get-PSCodeHealthComplianceRule` without any parameter, like so :  
 ```powershell
@@ -75,9 +75,9 @@ Note that we got 2 compliance rules for **TestCoverage**. This is because this m
 
 There is no need to memorize all the possible values for this `MetricName` parameter, they are discoverable via tab-completion.  
 
-## Checking a PowerShell project against PSCodeHealth's compliance rules  
+## Checking a PowerShell Project Against PSCodeHealth's Compliance Rules  
 
-Now that we know what `PSCodeHealth` compliance rules are, it's time to run them against some PowerShell code. Just like in the previous article, we'll use the code in [PSGithubSearch](https://github.com/MathieuBuisson/PSGithubSearch) as an example.  
+Now that we know what `PSCodeHealth` compliance rules are, it's time to run them against some PowerShell code. Just like in the [the previous article]({{- site.url -}}{%- link _posts/2017/2017-10-04-powershell-code-quality-pscodehealth.md -%}), we'll use the code in [PSGithubSearch](https://github.com/MathieuBuisson/PSGithubSearch) as an example.  
 
 The command which does this is `Test-PSCodeHealthCompliance`. It expects an object with the type `[PSCodeHealth.Overall.HealthReport]`, so we create the health report first, and we pass it to `Test-PSCodeHealthCompliance` via its `HealthReport` parameter :  
 ```powershell
@@ -111,7 +111,12 @@ NestingDepthAverage           4               8               2.2             Pa
 NestingDepthHighest           8               16              3               Pass
 ```
 
-You might be wondering why the hell we have 2 different entries for **TestCoverage** with 2 different values. Here is the first half of the answer :  
+So we have a few "**Fails**", but we knew that already because we saw red-colored items in [the HTML report]({{ "/assets/html/healthreport.html" | absolute_url }}). Indeed, the items color-coding is based on their compliance result :  
+  - Red corresponds to a **Fail** compliance result  
+  - Yellow corresponds to a **Warning** compliance result  
+  - Green corresponds to a **Pass** compliance result  
+
+You might be wondering why we have 2 instances of **TestCoverage** with different values. Here is the first half of the answer :  
 ```powershell
 C:\PSGithubSearch> Test-PSCodeHealthCompliance -HealthReport $HealthReport -SettingsGroup 'OverallMetrics' -MetricName 'TestCoverage'
 
@@ -133,17 +138,130 @@ The first one is the **overall** test coverage and the second one the test cover
 
 ```powershell
 C:\PSGithubSearch> $HealthReport.FunctionHealthRecords |
->> Select-Object -Property 'TestCoverage' |
->> Sort-Object -Property 'TestCoverage'
-
-TestCoverage
-------------
-       41.67
-       69.57
-       79.63
-       85.42
-        87.5
+>> Select-Object -ExpandProperty 'TestCoverage' |
+>> Sort-Object
+41.67
+69.57
+79.63
+85.42
+87.5
 ```
 
+In case we don't care about the compliance results details for every single metric and we just want a overall compliance result, we can use the `Summary` parameter :  
+```powershell
+C:\PSGithubSearch> Test-PSCodeHealthCompliance -HealthReport $HealthReport -Summary
 
-## Customizing compliance rules to fit our requirements  
+Fail
+```
+
+The summary result is the worst compliance result across the evaluated compliance rules :  
+  - If any evaluated metric has a **Fail** result, the summary result is **Fail**  
+  - If any evaluated metric has a **Warning** result and none has **Fail**, the summary result is **Warning**  
+  - If all evaluated metrics has a **Pass** result, the summary result is **Pass**  
+
+## Customizing Compliance Rules to Fit Our Requirements  
+
+### How PSCodeHealth's metrics thresholds were set  
+
+You might think `PSCodeHealth` is a very opiniated and rigid tool, with all these rules telling you what is *good* and *bad*, based on thresholds set by the 1 guy who wrote the tool. Who the hell is this guy anyway ?  
+I hear you.  
+
+First, I have tried to base compliance rules and metrics thresholds on 3 types of foundations, **in that order** :  
+  1. PowerShell community consensus (like in the [Best Practices and Style Guide](https://github.com/PoshCode/PowerShellPracticeAndStyle))  
+  2. Practices/thresholds from reference PowerShell projects (like in the [High Quality Module Guidelines](https://github.com/PowerShell/DscResources/blob/master/HighQualityModuleGuidelines.md))  
+  3. Metrics thresholds from [other code quality tools](https://www.ndepend.com/docs/code-metrics) (which don't support PowerShell and are generally geared towards Java, C#, Python...)  
+
+The problem is that #1 was often out of the question because many of the metrics collected `PSCodeHealth` have never been measured or even discussed by the PowerShell Community. #2 being extremely rare, I had to resort to #3 most of the time. And this may be *okay* because :  
+> Dear PowerShell, you're not **that** special  
+
+It turns out that communities for many different languages have come up with very similar consensuses and metrics thresholds. If something holds true across many different languages, why would there be an exception for PowerShell ?  
+
+That said, these rules, just like the `PSScriptAnalyzer` rules, should be based on input from the PowerShell community. So I invite you to [open issues](https://github.com/MathieuBuisson/PSCodeHealth/issues) so that we can open discussions, form consensuses and improve the tool.  
+
+Second, we can override `PSCodeHealth`'s default metrics thresholds with user-defined ones.  
+
+### Customizing metrics thresholds  
+
+Some PowerShell projects may have different requirements depending on their nature. It may be harder to reach a given test coverage for a project, not because it is poorly coded, but because it is altering external resources (a database for example). In this case, the **Warning** threshold (80%) and the **Fail** threshold (70%) may need to be adjusted.  
+
+The default compliance rules and their thresholds are stored in the file `PSCodeHealthSettings.json` in the module root. To customize them, it is NOT recommended to modify this file, but to create a new JSON file containing the rules we need to override.  
+
+For example, let's say that for `PSGithubSearch`, we decide that we want to override the following metrics thresholds :  
+  - OverallMetrics group :  
+    - LinesOfCodeAverage :  
+      - Warning threshold : 115  
+      - Fail threshold : 165  
+    - TestCoverage :  
+      - Warning threshold : 75  
+      - Fail threshold : 65  
+
+We create a new JSON file with the following content :  
+```json
+{
+    "PerFunctionMetrics": [
+    ],
+    "OverallMetrics": [
+        {
+            "LinesOfCodeAverage": {
+                "WarningThreshold": 115,
+                "FailThreshold": 165,
+                "HigherIsBetter": false
+            }
+        },
+        {
+            "TestCoverage": {
+                "WarningThreshold": 75,
+                "FailThreshold": 65,
+                "HigherIsBetter": true
+            }
+        }
+    ]
+}
+```
+
+We can name the file however we want and save it wherever we want (the root of the project is a convenient place for use in a release pipeline).  
+Any metric **not** specified in this file will use the default rule and thresholds.  
+
+To view the rules in effect (including custom rules), we run `Get-PSCodeHealthComplianceRule` and specify the path of the file containing user-defined rules via the `CustomSettingsPath` parameter :  
+```powershell
+C:\PSGithubSearch> $Params = @{CustomSettingsPath='.\ProjectRules.json'; SettingsGroup='OverallMetrics'}
+C:\PSGithubSearch> Get-PSCodeHealthComplianceRule @Params
+
+Metric Name                   Metric Group       Warning        Fail Threshold Higher Is
+                                                 Threshold                     Better
+-----------                   ------------       -------------- -------------- --------------
+LinesOfCodeTotal              OverallMetrics     1000           2000           False
+LinesOfCodeAverage            OverallMetrics     115            165            False
+ScriptAnalyzerFindingsTotal   OverallMetrics     30             60             False
+ScriptAnalyzerErrors          OverallMetrics     1              3              False
+ScriptAnalyzerWarnings        OverallMetrics     10             20             False
+ScriptAnalyzerInformation     OverallMetrics     20             40             False
+ScriptAnalyzerFindingsAverage OverallMetrics     7              12             False
+NumberOfFailedTests           OverallMetrics     1              3              False
+TestsPassRate                 OverallMetrics     99             97             True
+TestCoverage                  OverallMetrics     75             65             True
+CommandsMissedTotal           OverallMetrics     200            400            False
+ComplexityAverage             OverallMetrics     15             30             False
+ComplexityHighest             OverallMetrics     30             60             False
+NestingDepthAverage           OverallMetrics     4              8              False
+NestingDepthHighest           OverallMetrics     8              16             False
+```
+
+Now, let's check the compliance of our project code against these customized rules. Remember, earlier we got a **Fail** for **LinesOfCodeAverage** and a **Warning** for **TestCoverage** but now with our custom thresholds, they should both pass :  
+```powershell
+C:\PSGithubSearch> $Params = @{CustomSettingsPath='.\ProjectRules.json';
+>> SettingsGroup='OverallMetrics';
+>> MetricName='LinesOfCodeAverage','TestCoverage';
+>> HealthReport=$HealthReport }
+C:\PSGithubSearch> Test-PSCodeHealthCompliance @Params
+
+Metric Name                   Warning         Fail Threshold  Value           Result
+                              Threshold
+-----------                   --------------- --------------  -----           ------
+LinesOfCodeAverage            115             165             110.4           Pass
+TestCoverage                  75              65              77.1            Pass
+```
+
+We can see that the metrics thresholds are those from our `ProjectRules.json` file and that both metrics get a **Pass**.  
+
+## Using PSCodeHealth As a Quality Gate In a Release Pipeline  
