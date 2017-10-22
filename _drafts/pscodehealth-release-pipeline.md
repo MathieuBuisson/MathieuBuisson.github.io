@@ -265,3 +265,268 @@ TestCoverage                  75              65              77.1            Pa
 We can see that the metrics thresholds are those from our `ProjectRules.json` file and that both metrics get a **Pass**.  
 
 ## Using PSCodeHealth As a Quality Gate In a Release Pipeline  
+
+The release pipeline for the `PSGithubSearch` project is triggered [in AppVeyor](https://ci.appveyor.com/project/MathieuBuisson/psgithubsearch) by every code change in the GitHub repo. It is driven by the awesome task-based build automation tool : [Invoke-Build](https://github.com/nightroman/Invoke-Build).  
+
+### Tests-related tasks in the current pipeline  
+
+```powershell
+task Unit_Tests {
+    Write-TaskBanner -TaskName $Task.Name
+
+    $UnitTestSettings = $Settings.UnitTestParams
+    $Script:UnitTestsResult = Invoke-Pester @UnitTestSettings
+}
+```
+This task runs unit tests for the project. Pester output is stored in the variable named `UnitTestsResult`. This variable is script scoped because we need to access it from subsequent tasks.  
+
+In case you are curious about the arguments for `Invoke-Pester` (`$Settings.UnitTestParams`), they come from the file `PSGithubSearch.BuildSettings.ps1` :  
+
+```powershell
+UnitTestParams = @{
+    Script = '.\Tests\Unit'
+    CodeCoverage = '.\PSGithubSearch\PSGithubSearch.psm1'
+    OutputFile = "$PSScriptRoot\BuildOutput\UnitTestsResult.xml"
+    PassThru = $True
+}
+```
+This is also telling `Pester` to generate a NUnit-style test result file.  
+
+```powershell
+task Fail_If_Failed_Unit_Test {
+    Write-TaskBanner -TaskName $Task.Name
+
+    $FailureMessage = '{0} Unit test(s) failed. Aborting build' -f $UnitTestsResult.FailedCount
+    assert ($UnitTestsResult.FailedCount -eq 0) $FailureMessage
+}
+```
+This task ensures the build fails if there is any failed unit test. This is one of those tasks which needs to access the script scoped `$UnitTestsResult`. If its `FailedCount` property is not 0, it will make the build fail.  
+  
+
+```powershell
+task Publish_Unit_Tests_Coverage {
+    Write-TaskBanner -TaskName $Task.Name
+
+    $Coverage = Format-Coverage -PesterResults $UnitTestsResult -CoverallsApiToken $Settings.CoverallsKey -BranchName $Settings.Branch
+    Publish-Coverage -Coverage $Coverage
+}
+```
+This task uses the [Coveralls module](https://github.com/JanJoris/coveralls) to publish the tests result to [coveralls.io](https://coveralls.io/github/MathieuBuisson/PSGithubSearch).  
+
+
+```powershell
+task Upload_Test_Results_To_AppVeyor {
+    Write-TaskBanner -TaskName $Task.Name
+
+    $TestResultFiles = (Get-ChildItem -Path $Settings.BuildOutput -Filter '*TestsResult.xml').FullName
+    Foreach ( $TestResultFile in $TestResultFiles ) {
+        "Uploading test result file : $TestResultFile"
+        (New-Object 'System.Net.WebClient').UploadFile($Settings.TestUploadUrl, $TestResultFile)
+    }
+}
+```
+This task uploads test result file(s) to AppVeyor so that it can integrate the tests results in the build result page :  
+![AppVeyor Tests tab]({{ "/images/2017-10-24-pscodehealth-release-pipeline-tests.png" | absolute_url }})  
+  
+And finally :  
+
+```powershell
+task Test Unit_Tests,
+    Fail_If_Failed_Unit_Test,
+    Publish_Unit_Tests_Coverage,
+    Upload_Test_Results_To_AppVeyor
+```
+
+The `Test` task references all the tasks mentioned earlier. This acts as a logical grouping because whenever this `Test` task is invoked, it will invoke all referenced tasks **in the specified order**.  
+
+### Code analysis tasks in the current pipeline  
+
+```powershell
+task Analyze {
+    Write-TaskBanner -TaskName $Task.Name
+
+    Add-AppveyorTest -Name 'Code Analysis' -Outcome Running
+    $AnalyzeSettings = $Settings.AnalyzeParams
+    $Script:AnalyzeFindings = Invoke-ScriptAnalyzer @AnalyzeSettings
+
+    If ( $AnalyzeFindings ) {
+        $FindingsString = $AnalyzeFindings | Out-String
+        Write-Warning $FindingsString
+        Update-AppveyorTest -Name 'Code Analysis' -Outcome Failed -ErrorMessage $FindingsString
+    }
+    Else {
+        Update-AppveyorTest -Name 'Code Analysis' -Outcome Passed
+    }
+}
+```
+This task runs `PSScriptAnalyzer` against the project's code and stores the output in the `AnalyzeFindings` variable. This variable is script scoped, which enables other tasks to access it. The commands `Add-AppveyorTest` and `Update-AppveyorTest` are provided by AppVeyor's build agent to integrate with the **Tests** tab in the build result page.  
+
+```powershell
+task Fail_If_Analyze_Findings {
+    Write-TaskBanner -TaskName $Task.Name
+
+    $FailureMessage = 'PSScriptAnalyzer found {0} issues. Aborting build' -f $AnalyzeFindings.Count
+    assert ( -not($AnalyzeFindings) ) $FailureMessage
+}
+```
+This task ensure the build fail if `PSScriptAnalyzer` outputs anything.  
+
+### Expanding the code analysis tasks into a full-blown quality gate  
+
+For the task `Fail_If_Failed_Unit_Test`, we could change the assertion to read the `NumberOfFailedTests` property of the `PSCodeHealth` report, to decide whether the build should fail. But we'll leave the Tests-related task as they are because this is not where **PSCodeHealth** gives us the most value.  
+
+We are going to focus on the code analysis tasks : `Analyze` and `Fail_If_Analyze_Findings`. We'll use **PSCodeHealth** to streamline and expand them to cover more than linting. We'll create a quality gate based on the code metrics that we care about and compliance rules which reflect our project's requirements.  
+
+To leverage `PSCodeHealth` in our release pipeline, the first thing to do is to add it as a build dependency in our settings file `PSGithubSearch.BuildSettings.ps1` :  
+
+```powershell
+$Settings = @{
+  Dependency = @('Coveralls','Pester','PsScriptAnalyzer','PSCodeHealth')
+  ...
+}
+```
+As seen earlier, the `Unit_Tests` task stores `Pester` output, **including code coverage information**, in a variable accessible from other tasks. `Invoke-PSCodeHealth` will reuse it via its `TestsResult` parameter, instead of running the tests again.  
+So the task to generate the `PSCodeHealth` report looks like this :  
+
+```powershell
+task Generate_Quality_Report {
+    Write-TaskBanner -TaskName $Task.Name
+
+    $CodeHealthSettings = $Settings.CodeHealthParams
+    $Script:HealthReport = Invoke-PSCodeHealth @CodeHealthSettings -TestsResult $UnitTestsResult
+}
+```
+Again, we store the output into a variable scoped at the script level because we'll need to access it from a subsequent task.  
+The arguments passed via `$Settings.CodeHealthParams` come from the BuildSettings file :  
+
+```powershell
+    CodeHealthParams = @{
+        Path = '.\PSGithubSearch\'
+    }
+```
+First, we'll replicate what the task `Fail_If_Analyze_Findings` did. Basically, this task checked if `PSScriptAnalyzer` output was `Null`. If not, it ensured that the build failed.  
+
+To do that, we could read the `ScriptAnalyzerFindingsTotal` property of the code health report. But there is another (probably better) way : translate this requirement into a **PSCodeHealth** compliance rule and add it to our `ProjectRules.json` file.
+
+So, we add a rule for the **ScriptAnalyzerFindingsTotal** metric, to consider any value greater than 0 a failure :  
+
+```json
+{
+    "PerFunctionMetrics": [
+    ],
+    "OverallMetrics": [
+        {
+            "LinesOfCodeAverage": {
+                "WarningThreshold": 115,
+                "FailThreshold": 165,
+                "HigherIsBetter": false
+            }
+        },
+        {
+            "TestCoverage": {
+                "WarningThreshold": 75,
+                "FailThreshold": 65,
+                "HigherIsBetter": true
+            }
+        },
+        {
+            "ScriptAnalyzerFindingsTotal": {
+                "WarningThreshold": 0,
+                "FailThreshold": 0,
+                "HigherIsBetter": false
+            }
+        }
+    ]
+}
+```
+`Test-PSCodeHealthCompliance` always evaluates a metric against its **FailThreshold** first, so it is fine to have the same value for both thresholds. The compliance result will be **Fail** whenever the value is greater than 0 and the **WarningThreshold** will not be evaluated.  
+
+We now have a file containing custom metrics thresholds which are specific to the `PSGithubSearch` project and the metrics for the project's code in `$HealthReport`. So we feed both of these into `Test-PSCodeHealthCompliance` and it will tells us if the code passes our quality bar.  
+
+Just before that, let's list the metrics we care about :  
+  - **LinesOfCodeAverage** (custom thresholds)  
+  - **TestCoverage** (custom thresholds)  
+  - **ScriptAnalyzerFindingsTotal** (custom thresholds)  
+  - **ComplexityAverage** (default thresholds)  
+
+So the splatted arguments for `Test-PSCodeHealthCompliance` that we add into `PSGithubSearch.BuildSettings.ps1` are :  
+
+```powershell
+    QualityGateParams = @{
+        CustomSettingsPath = '.\ProjectRules.json'
+        SettingsGroup = 'OverallMetrics'
+        MetricName = @('LinesOfCodeAverage',
+            'TestCoverage',
+            'ScriptAnalyzerFindingsTotal'
+            'ComplexityAverage'
+        )
+    }
+```
+Then, we add a task like this in the build script :  
+
+```powershell
+task Fail_If_Quality_Goal_Not_Met {
+    Write-TaskBanner -TaskName $Task.Name
+
+    Add-AppveyorTest -Name 'Quality Gate' -Outcome Running
+    $QualityGateSettings = $Settings.QualityGateParams
+    $Compliance = Test-PSCodeHealthCompliance @QualityGateSettings -HealthReport $HealthReport
+    $Compliance | Select-Object 'MetricName','Value','Result'
+    $FailedRules = $Compliance | Where-Object Result -eq 'Fail'
+
+    If ( $FailedRules ) {
+        $FailedString = $FailedRules | Select-Object 'MetricName','Value','Result' | Out-String
+        $WarningMessage = "Failed compliance rules : `n" + $FailedString
+        Write-Warning $WarningMessage
+        $ErrorMessage = "Project's code didn't pass the quality gate. Aborting build"
+        Update-AppveyorTest -Name 'Quality Gate' -Outcome Failed -ErrorMessage $ErrorMessage
+        Throw $ErrorMessage
+    }
+    Else {
+        Update-AppveyorTest -Name 'Quality Gate' -Outcome Passed
+    }
+}
+```
+The key here is `$FailedRules`, if it's not `$Null`, additional stuff needs to happen :  
+  - Convert the failed rules to a string and build a warning message out of it  
+  - Write that to the warning stream to make it stand out in the build console  
+  - Build a brief but descriptive error message  
+  - `Throw` this error message to make the build fail  
+
+We could just use the `Summary` parameter to get the overall compliance result, but then we wouldn't know which metric got a **Fail**.  
+
+Now, we need to tell `Invoke-Build` to run these new tasks. All it takes is to reference them in the default task (`.`) within the build script :  
+```powershell
+# Default task :
+task . Clean,
+    Install_Dependencies,
+    Test,
+    Generate_Quality_Report,
+    Fail_If_Quality_Goal_Not_Met,
+    Set_Module_Version,
+    Push_Build_Changes_To_Repo,
+    Copy_Source_To_Build_Output
+```
+
+Here is the resulting build console output in AppVeyor :  
+
+![AppVeyor console passing gate]({{ "/images/2017-10-24-pscodehealth-release-pipeline-quality-gate.png" | absolute_url }})  
+
+Cool, the happy path is working.  
+
+Now, I want to see an error, I need <span style="color:red">**some red**</span>. I feed from consoles bleeding error messages. I'm a vampire...  
+Sorry, got carried away for a second.  
+
+A simple way to get a failed compliance result is to remove the **LinesOfCodeAverage** entry from our `ProjectRules.json` file. This makes `Test-PSCodeHealthCompliance` use the default rule, which has a **Fail** threshold of 60. The current value for the project's code is 110.4, so it should fail.  
+
+![AppVeyor console failing gate]({{ "/images/2017-10-24-pscodehealth-release-pipeline-failure.png" | absolute_url }})  
+
+Indeed, we get some yellow and some red. Also, the build fails as expected.  
+
+## Conclusion  
+
+`PSCodeHealth` has been designed to be flexible. It can be used to check only the metrics **you** care about and the rules can be easily customized to meet **your** goals or requirements.  
+
+Also, it can be leveraged in a release pipeline to create a quality gate covering various aspects of code quality and maintainability.  
+
+As a reminder, you can get `PSCodeHealth` from the [PowerShell Gallery](https://www.powershellgallery.com/packages/PSCodeHealth) and of course, the code is [on GitHub](https://github.com/MathieuBuisson/PSCodeHealth).  
