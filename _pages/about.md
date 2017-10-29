@@ -28,7 +28,7 @@ I’m a Senior DevOps Engineer at [Oneview Healthcare](http://www.oneviewhealthc
   - Learning, growing, more, always  
   - Sharing knowledge  
   - Improving productivity (and ultimately quality) through automation  
-  - Solving problems with code  
+  - Solving problems with code (real problems, not coding puzzles)  
   - Software engineering and delivery  
 
 ### What fuels me :  
