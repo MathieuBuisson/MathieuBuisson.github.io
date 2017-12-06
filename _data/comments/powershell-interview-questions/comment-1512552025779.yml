@@ -1,0 +1,7 @@
+_id: b0d0c200-da66-11e7-8895-6b8e430ddd88
+message: ">>You need to make sure the user inputs a valid IP address.\r\n>>How would you do that ?\r\n>>A great candidate would use ...\r\n>>[System.Net.IPAddress] \r\n\r\nFYI: The constructor for [IP Address] accepts [in64]\r\nSo [ipaddress]\"1\" is valid (IP address 0.0.0.1)\r\nas is [ipaddress]1 or even [ipaddress]0 & [ipaddress]$null\r\n\r\nSo I think a great candidate would use a regular expression and that regular expression would vary depending on whether the IP address was an end point or a subnet mask etc\r\n\r\nOf course you could use a simple regular expression to check the users IP address contains four bytes and then cast the string with [ipaddress]. This is more lines but if done as a function probably more supportable code?"
+name: Jeremy Pack
+email: f4650337fe91f5945ece35edc2c8c109
+url: ''
+hidden: ''
+date: '2017-12-06T09:20:25.778Z'
