@@ -1,0 +1,15 @@
+_id: 97ba4c30-01b4-11e8-9a84-7fd1a392669e
+message: >-
+  Thanks for the great article! Personally if I have a particularly complex
+  object to Mock, i've been temporarily modifying the code so that when it runs
+  it exports that object to a file via `Export-Clixml` (then I've been editing
+  the file to anonymize the data) and storing it in the Tests folder named
+  `<callingfunction><cmdletname>.mock.xml`. Then obviously I just load the
+  object for the mock with `Import-Clixml`. It does result however in the Tests
+  folder becoming quite cluttered with XMLs, so I do like how your method puts
+  them all together in a single file.
+name: Mark Wragg
+email: 61a9164f18daffa6c7765cd8c77ff2d8
+url: 'http://wragg.io'
+hidden: ''
+date: '2018-01-25T09:46:19.588Z'
