@@ -13,9 +13,8 @@ In this *cattle* world where we spin up and tear down environments as needed, we
 The Octopus Tentacle Azure VM extension can register the tentacle with the Octopus server, but **not unregister it**. There is no off-the-shelf solution to automatically trigger the removal of an Octopus machine (i.e. deployment target) when the VM is deleted from Azure.  
 
 So in this article, we'll look at how to do exactly that, by leveraging 2 powerful Azure services :  
-  - Azure Automation  
-  - Azure Event Grid  
-
+  - **Azure Automation** : SASS offering to run and manage scripts, workflows and configuration management  
+  - **Azure Event Grid** : enables apps, Azure services, and 3rd-party services to emit and subscribe to lightweight notifications  
 
 ## Azure Automation Runbook To Remove a Machine From an Octopus Server  
 
