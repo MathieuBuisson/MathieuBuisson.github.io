@@ -14,7 +14,7 @@ These environments, especially the ones used for **development**, **CI/CD**, or 
 In a *cattle* mindset, we spin up environments only when they are needed and we tear them down as soon as they are not needed anymore.  
 Coupled with automation, this provides **speed**, **consistency**, **self-service** and **cost control**. Even more so if we leverage cloud resources.  
 
-When spinning up environments in Azure, the provisioning of Octopus deployment targets (including registration of the Octopus tentacle with the server) can be fully automated with ARM templates and the [Tentacle Azure VM extension](https://octopus.com/docs/infrastructure/windows-targets/azure-virtual-machines/via-an-arm-template).  
+When spinning up environments in Azure, the provisioning of Octopus deployment targets (including registration of Octopus tentacles with the server) can be fully automated with ARM templates and the [Tentacle Azure VM extension](https://octopus.com/docs/infrastructure/windows-targets/azure-virtual-machines/via-an-arm-template).  
 
 This is nice, but the journey from **pet** environments to **cattle** requires the ability to kill our cattle in a quick and painless way. The deletion of resources from Azure is easy to automate but :  
 > What about the removal of Octopus deployment targets from the server ?  
@@ -23,7 +23,7 @@ The Octopus Tentacle Azure VM extension can register the tentacle with the Octop
 
 So in this article, we'll look at how to do exactly that, by leveraging 2 powerful Azure services :  
   - **Azure Automation** : SASS offering to run and manage scripts, workflows and configuration management  
-  - **Azure Event Grid** : enables apps, Azure services, and 3rd-party services to emit and subscribe to lightweight notifications  
+  - **Azure Event Grid** : enables apps, Azure services, and 3rd-party services to emit and subscribe to notifications  
 
 ## Runbook To Remove a Machine From an Octopus Server  
 
@@ -34,7 +34,9 @@ Creating an Automation account is straightforward, as explained in [this documen
 
 To send commands to our Octopus server, we could write our own calls to the [Octopus REST API](https://octopus.com/docs/api-and-integration/api), but why reinvent the wheel when we can use the excellent [Octoposh](https://github.com/Dalmirog/OctoPosh) module right from Azure Automation ?  
 
-To import the module in our Automation account, select **Modules** and click on **Browse Gallery**. This provides access all the modules from the PowerShell Gallery. Search for `Octoposh`, select the search result and then, click on **Import** and **OK**.  
+To import the module in our Automation account, select **Modules** and click on **Browse Gallery**. This provides access all the modules from the PowerShell Gallery.  
+
+Search for `Octoposh`, select the search result and then, click on **Import** and **OK**.  
 
 ### Adding Variables to Connect to our Octopus Server  
 
@@ -45,8 +47,8 @@ Our runbook will need to connect to the Octopus server. This requires 2 pieces o
 We'll store these 2 values as variables in our Automation account so that the runbook can easily and securely access them.  
 
 Select **Variables** and click on **Add a variable**.  
-Create the following variables :  
 
+Create the following variables :  
   - The server URL :  
     - **Name** : OctopusURL  
     - **Type** : String  
@@ -58,7 +60,7 @@ Create the following variables :
     - **Value** : API key from an account which has **MachineDelete** permission (preferably a service account)  
     - **Encrypted** : Yes  
 
-We are now ready to create a runbook which will be used to remove machines from Octopus.  
+We are now ready to create the runbook used to remove machines from Octopus.  
 
 ### Creating The Runbook To Remove a Machine From Octopus  
 
@@ -103,18 +105,20 @@ If ( $OctopusMachine ) {
 
 The runbook's parameters deserve some explanation :  
   - `$MachineName` : Value passed from another runbook (more on that later)  
-  - `$OctopusURL` : Value read from the `OctopusURL` Automation variable  
+  - `$OctopusURL` : Value read from the `OctopusURL` Automation variable we created earlier  
   - `$OctopusAPIKey` : Value read from the `OctopusAPIKey` Automation variable  
 
-Because we imported the `Octoposh` into our Automation account, all its cmdlets are readily available to us when we write runbooks. In this case, the module is imported explicitly, but this is only a preference of mine, we could just use PowerShell module auto-loading.  
+Because we imported the `Octoposh` into our Automation account, its cmdlets are readily available to us when we write runbooks. Here, the module is imported explicitly, but this is only a preference of mine, we could just use PowerShell module auto-loading.  
 
 `Set-OctopusConnectionInfo` is a cmdlet which comes from `Octoposh`.  
 The command is piped to `Out-Null` to avoid, *ahem*, having the API key exposed in plain text in the output.  
 
-`Get-OctopusMachine` is used to query the Octopus server for the machine (by name). If the machine is present in Octopus, we use `Remove-OctopusResource` (another `Octoposh` cmdlet) to remove it.  
+`Get-OctopusMachine` is used to query the Octopus server for the machine (by name).  
+If the machine is present in Octopus, we use `Remove-OctopusResource` (another `Octoposh` cmdlet) to remove it.  
 
 ## Runbook To Be Triggered on Azure Resource Deletion  
 
+Now, we are going to create a runbook to listen to Azure resource deletion events in the same subscription as the Automation account. If the resource deleted is a VM, then it will call the other runbook.  
 
 
 ## Adding an Event Subscription  
