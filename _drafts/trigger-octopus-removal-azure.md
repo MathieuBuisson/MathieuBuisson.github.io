@@ -118,7 +118,7 @@ If the machine is present in Octopus, we use `Remove-OctopusResource` (another `
 
 ## Runbook To Be Triggered on Azure Resource Deletion  
 
-Now, we are going to create a runbook to listen to Azure resource deletion events in the same subscription as the Automation account. If the resource deleted is a VM, then it will call the other runbook.  
+Now, we create a second runbook, the purpose of which is to listen to Azure resource deletion events. If the resource deleted is a VM, then it calls the other runbook.  
 
 
 ## Adding an Event Subscription  
