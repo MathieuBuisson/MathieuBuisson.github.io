@@ -8,10 +8,10 @@ excerpt: 'In this post, we take a look at leveraging Azure Automation and Azure 
 
 ## The Use Case  
 
-Let's say we use [Octopus Deploy](https://octopus.com/) to standardize our software deployments across all environments.  
+Let's say we use [Octopus Deploy](https://octopus.com/) to standardize our software deployments across many environments.  
 These environments, especially the ones used for **development**, **CI/CD**, or **QA** purposes greatly benefit from being managed as transient *cattle* (as opposed to *pets*).  
 
-In a *cattle* mindset, we spin up environments only when they are needed and we tear them down as soon as they are not needed anymore.  
+In a *cattle* mindset, we spin up environments only when they are needed and tear them down as soon as they are not needed.  
 Coupled with automation, this provides **speed**, **consistency**, **self-service** and **cost control**. Even more so if we leverage cloud resources.  
 
 When spinning up environments in Azure, the provisioning of Octopus deployment targets (including registration of Octopus tentacles with the server) can be fully automated with ARM templates and the [Tentacle Azure VM extension](https://octopus.com/docs/infrastructure/windows-targets/azure-virtual-machines/via-an-arm-template).  
@@ -108,7 +108,7 @@ The runbook's parameters deserve some explanation :
   - `$OctopusURL` : Value read from the `OctopusURL` Automation variable we created earlier  
   - `$OctopusAPIKey` : Value read from the `OctopusAPIKey` Automation variable  
 
-Because we imported the `Octoposh` into our Automation account, its cmdlets are readily available to us when we write runbooks. Here, the module is imported explicitly, but this is only a preference of mine, we could just use PowerShell module auto-loading.  
+Because we imported the `Octoposh` module into our Automation account, its cmdlets are readily available when we write runbooks. Here, the module is imported explicitly, but this is only a preference of mine, we could just use PowerShell module auto-loading.  
 
 `Set-OctopusConnectionInfo` is a cmdlet which comes from `Octoposh`.  
 The command is piped to `Out-Null` to avoid, *ahem*, having the API key exposed in plain text in the output.  
@@ -118,10 +118,59 @@ If the machine is present in Octopus, we use `Remove-OctopusResource` (another `
 
 ## Runbook To Be Triggered on Azure Resource Deletion  
 
-Now, we create a second runbook, the purpose of which is to listen to Azure resource deletion events. If the resource deleted is a VM, then it calls the other runbook.  
+### Creating The "Listener" Runbook  
+
+Now, we create a second runbook, the purpose of which is to listen to Azure resource deletion events.  
+
+We name this runbook `Watch-VMDeletion` and the runbook type is **PowerShell**.  
+
+This runbook will contain the following code :  
+
+```powershell
+Param(
+    [Object]$WebhookData
+)
+
+$RequestBody = $WebhookData.RequestBody | ConvertFrom-Json
+$Data = $RequestBody.data
+
+# No point in proceeding if the operation is not a VM deletion
+If ( $Data.operationName -ne 'Microsoft.Compute/virtualMachines/delete' ) {
+    return
+}
+
+$PropertiesToLog = @('correlationId','resourceProvider','resourceUri','operationName','status','subscriptionId')
+$WebhookDataToLog = $Data | Select-Object -Property $PropertiesToLog
+$WebhookDataToLog
+
+$Resources = $Data.resourceUri.Split('/')
+$VMName = $Resources[8].Trim()
+"VMName from webhook data : $VMName"
+
+If ( $Data.status -eq 'Succeeded') {
+    'Invoking runbook : Remove-MachineFromOctopusServer'
+    .\Remove-MachineFromOctopusServer.ps1 -MachineName $VMName
+}
+Else {
+    'Deletion event did not succeed, skipping the removal from Octopus server'
+}
+```
+
+The value of the `$WebhookData` parameter will automagically be populated by the webhook triggering it.  
+In turn, the webhook data is passed from the event which has triggered the webhook. This gives us access to rich information about the event and the deleted resource.  
+
+This runbook will be triggered every time an Azure resource is deleted, regardless of the resource type. This is because the event subscriptions filters are a bit limited.  
+
+I opened [this suggestion](https://feedback.azure.com/forums/909934-azure-event-grid/suggestions/33594466-allow-wildcards-in-prefix-subjectbeginswith-an) on the Azure Event Grid Uservoice about this limitation.
+{: .notice--info }  
+
+So, we perform the filtering within this runbook, we check the `operationName` property from the webhook data.
+
+### Adding a Webhook To The "Listener" Runbook  
 
 
 ## Adding an Event Subscription  
 
 ## Testing The Trigger And Runbooks  
+
 
