@@ -224,7 +224,29 @@ It should look like this :
 
   - Click **Create**  
 
-All the pieces are in place, we can now delete deployment targets from Azure and watch them magically disappear from our Octopus Deploy server.  
+{% capture notice-text %}
+Last time I checked, the **Azure Subscriptions** topic type was not visible in the Azure Portal anymore.  
+Fortunately, we can still use PowerShell to create this event subscription.  
+Here is how :
+{% endcapture %}  
+
+<div class="notice--info">
+  <h4>Update :</h4>
+  {{ notice-text | markdownify }}
+</div>  
+
+```powershell
+Select-AzureRmSubscription -SubscriptionId $TargetSubscriptionId
+$EventGridSubParams = @{
+    EventSubscriptionName = 'OctoVMDeletion'
+    EndpointType = 'webhook'
+    Endpoint = $WebhookUrlFromWebhookCreationStep
+    IncludedEventType = 'Microsoft.Resources.ResourceDeleteSuccess'
+}
+New-AzureRmEventGridSubscription @EventGridSubParams
+```  
+
+Now, all the pieces are in place, we can delete deployment targets from Azure and watch them magically disappear from our Octopus Deploy server.  
 
 ## Testing The Trigger And Runbooks  
 
