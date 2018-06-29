@@ -1,0 +1,7 @@
+_id: 5beae070-7b80-11e8-91bc-f795b759aa50
+message: "Hi Alan,\r\nI haven't tried with VMs within a VM Scale Set.  \r\nBut, as long as VM deletion from a Scale Set generates an event with a **'Microsoft.Compute/virtualMachines/delete'** operation name, it will work."
+name: Mathieu Buisson
+email: f31b537cb62ba1aeb81c62fabd244cef
+url: 'https://mathieubuisson.github.io'
+hidden: ''
+date: '2018-06-29T09:39:46.729Z'
