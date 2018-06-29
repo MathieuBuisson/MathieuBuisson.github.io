@@ -1,0 +1,12 @@
+_id: b29d4730-7be1-11e8-91bc-f795b759aa50
+message: >-
+  Hi. I really liked this too! Although found out that the script needs to be
+  run As Admin to get the Ticks and thus CPU% values (otherwise runs into zero
+  divisions errors). Also, the State = Wait and User CPU% = 100 seems funny
+  (shown in your screenshot and noticed the same on my server). But anyway, this
+  was a good learning for me. Thanks!
+name: Miika Varis
+email: 835be2f3adcf612e88a29fd856c09c40
+url: ''
+hidden: ''
+date: '2018-06-29T21:16:33.554Z'
