@@ -1,0 +1,11 @@
+_id: cb8a1e40-8612-11e8-bc0b-854aed025d9d
+message: >-
+  I'm trying to set up our machines (1800 of them, running Windows 10 and
+  Windows 7).  When I look at the current setting for DebugInfoType, it is
+  mostly 7, which is not listed above as one of the possible ones.  What does
+  '7' mean?
+name: John Thayer Jensen
+email: c6b07fa40214fb25cf726cd1df874a81
+url: ''
+hidden: ''
+date: '2018-07-12T20:33:12.209Z'
