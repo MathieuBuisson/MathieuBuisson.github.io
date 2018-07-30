@@ -1,0 +1,7 @@
+_id: 04f2a560-93fd-11e8-a1dd-499116808ad6
+message: "is there anything similar to 'Export-PowershellDataFile' ? In my situation I'm trying to provide a way for engineers to add nodes to the psd1 file without editing the psd1 file directly.  \r\n\r\nImport-PowershellDataFile seems like a great start, but I don't see an Export-PowershellDataFile."
+name: ekw
+email: 4ead014c1a0342e38d4f45de6df24514
+url: ''
+hidden: ''
+date: '2018-07-30T13:32:35.752Z'
