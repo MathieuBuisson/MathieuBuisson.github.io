@@ -1,0 +1,7 @@
+_id: 55230da0-ac4d-11e8-ad57-d942879398b5
+message: "Hi Mathieu,\r\n\r\nThis article is very helpful.Thank you. Like many people I've worked a lot on shell scripting. Now I ran into a situation where I need to develop a script for windows environment which I have no clue about . Well I took my unix script and started to make a powershell out of it. I'm stuck at a place and I'm hoping if you could help me here. Here is the requirement.\r\nI have a text file and I want to cat few lines( precisely from a particular line number till the last line of the file) from the text file into a different text file.\r\n\r\nI take the line number with the below code and save into a variable \r\n\r\n$LINE=select-string \"Mon Aug 20 17:08:46 2018\" a.txt |select -exp Linenumber\r\n\r\nand want to print all the lines from that line number till the end of the file like done with \"sed\" command in linux.\r\n\r\nsed -n \"$LINE,$p\" a.txt >b.txt\r\n\r\nCan you please help me with this.\r\n\r\nThanks a ton in advance.\r\npvr"
+name: pvr
+email: c25c2304d99c0ff3e288da170bb304b4
+url: ''
+hidden: ''
+date: '2018-08-30T12:07:58.012Z'
