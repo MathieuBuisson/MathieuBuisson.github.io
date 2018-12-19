@@ -1,0 +1,7 @@
+_id: 7a2852c0-032f-11e9-b939-092381c81468
+message: "Great stuff but a few problems:\r\n\r\nGet-ChildItem -Filter \"*azure*\" -Recurse -File\r\n\r\nSpews errors. I've searched for a solution but found none. I'm in as Administrator so it isn't a rights issue. You can ignore the errors with\r\n\r\nGet-ChildItem -Recurse -File -Filter *azure* -ErrorAction SilentlyContinue  \r\n\r\nBut then you will be missing stuff that may be important."
+name: TRM
+email: 48cef626cb76b6f7a0873c85d54632fc
+url: ''
+hidden: ''
+date: '2018-12-19T01:43:26.469Z'
