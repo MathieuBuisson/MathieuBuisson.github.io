@@ -67,7 +67,7 @@ Please be patient, the downloads may take a while.{% endcapture %}
 
 As soon as `Install-PSAksPrerequisites` completes, we can start deploying stuff.  
 
-## Deploying an Azure Kubernetes (AKS) Cluster
+## Deploying an Azure Kubernetes (AKS) Cluster  
 
 This is where the command `Invoke-PSAksDeployment` comes in.  
 
@@ -255,12 +255,41 @@ We can populate and change the values to our needs, and when the file is ready, 
 PS C:\> Invoke-PSAksDeployment -ConfigPath '.\my-k8s-prod.psd1'
 ```
 
-There is quite a lot of logging written to the console, some of which will look very familiar to those who use `Terraform`.
+While the deployment is in progress, there is quite a lot of logging written to the console, some of which will look very familiar to those who use `Terraform`.
 
-Sit back and relax, the overall deployment takes around 20-25 minutes.
+The overall deployment duration depends on many variables, some of which we have no control over (those related to the Azure infrastructure/platform).  
+That being said, in my experience, it takes between 20 and 40 minutes.
 
-When it completes, **Kubernetes** management tools are ready to work with our new cluster.  
-For example, we can list the deployments in the "management" namespace :  
+When it completes, we can take a look at the deployed resources in the Azure portal, but what we can see in the resource group (`my-k8s-prod-rg` in this case) is somewhat deceptive :  
+
+![my-k8s-prod-rg]({{ "/images/deploying-aks-cluster-psaksdeployment-resourcegroup.png" | absolute_url }})  
+
+Azure AKS creates another resource group (`MC_my-k8s-prod-rg_my-k8s-prod_northeurope` in this case), which contains the infrastructure resources associated with the cluster : Kubernetes node VMs, virtual network, load balancer, storage, etc :  
+
+![Infra resource group]({{ "/images/deploying-aks-cluster-psaksdeployment-infra-resourcegroup.png" | absolute_url }})  
+
+Also, the usual **Kubernetes** management tools are ready to work with our new cluster.  
+For example, we can use our trusty `kubectl` to list the deployments in the "management" namespace :  
+
+```powershell
+PS C:\> kubectl get deployment -n management
+NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+cert-manager                    1         1         1            1           33m
+nginx-ingress-controller        2         2         2            2           40m
+nginx-ingress-default-backend   1         1         1            1           40m
+secret-propagator               1         1         1            1           32m
+```  
+
+Or use a `helm` command to list all Helm releases :  
+
+```powershell
+PS C:\> helm ls
+NAME                 REVISION    UPDATED                     STATUS      CHART                   APP VERSION   NAMESPACE
+cert-manager         1           Mon Jan 28 10:35:08 2019    DEPLOYED    cert-manager-v0.5.2     v0.5.2        management
+cluster-issuer       1           Mon Jan 28 10:35:18 2019    DEPLOYED    cluster-issuer-0.1.0    1.0           default
+nginx-ingress        1           Mon Jan 28 10:28:41 2019    DEPLOYED    nginx-ingress-1.1.5     0.21.0        management
+secret-propagator    1           Mon Jan 28 10:36:32 2019    DEPLOYED    secret-propagator-0.1.0 1.0           default
+```  
 
 
 
@@ -271,31 +300,20 @@ For example, we can list the deployments in the "management" namespace :
 _______________________________________________________________________________________
 
 
-```powershell
-PS C:\> kubectl get deployment -n management
-NAMESPACE     NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-management    cert-manager                    1         1         1            1           5m
-management    nginx-ingress-controller        2         2         2            2           11m
-management    nginx-ingress-default-backend   1         1         1            1           11m
-management    secret-propagator               1         1         1            1           3m
-```
-
-Or list all Helm releases :
-
-```powershell
-PS C:\> helm ls
-NAME                 REVISION    UPDATED                       STATUS         CHART                   APP VERSION   NAMESPACE
-cert-manager         1           Sun Dec  9 18:49:40 2018      DEPLOYED       cert-manager-v0.5.2     v0.5.2        management
-cluster-issuer       1           Sun Dec  9 18:49:51 2018      DEPLOYED       cluster-issuer-0.1.0    1.0           default
-nginx-ingress        1           Sun Dec  9 18:43:16 2018      DEPLOYED       nginx-ingress-1.0.1     0.21.0        management
-secret-propagator    1           Sun Dec  9 18:51:40 2018      DEPLOYED       secret-propagator-0.1.0 1.0           management
-```
-
-### Deleting the AKS cluster (and all associated resources)
+## Deleting an Azure Kubernetes (AKS) Cluster  
 
 An AKS cluster deployed with `Invoke-PSAksDeployment` may need to be later deprovisioned.
 
-In this case, the cmdlet `Remove-PSAksDeployment` automates tearing down the Azure Kubernetes Service instance and all associated resources, to stop incurring any Azure charges.
+In this case, the cmdlet `Remove-PSAksDeployment` automates tearing down the Azure Kubernetes Service instance and all associated resources, to stop incurring any Azure charges.  
+
+{% capture notice-delete %}
+This deletes **all** resources in both resource groups : the target resource group and the infrastructure resource group created by AKS.  
+Keep this in mind, especially if any resource(s) were added outside of `PSAksDeployment`'s purview.{% endcapture %}
+
+<div class="notice--warning">
+  <h4>Warning :</h4>
+  {{ notice-delete | markdownify }}
+</div>
 
 Here is an example usage :
 
@@ -305,7 +323,12 @@ PS C:\> $DestroyParams = @{
 >>     ServicePrincipalSecret = 'tsWpRr6/YCxNyh8efMvjWbe5JoOiOw03xR1o9S5CLhZ='
 >>     AzureTenantID          = '96v3b174-9c1p-4a5e-9177-18c3bccc87cb'
 >>     Subscription           = 'DevOps'
->>     ClusterName            = 'docs-cluster'
+>>     ClusterName            = 'my-k8s-prod'
 >> }
 PS C:\> Remove-PSAksDeployment @DestroyParams
 ```
+
+That's pretty much it on how to use `PSAksDeployment`, now let's take a peek under the hood.
+
+## The Underlying Terraform Configurations  
+
