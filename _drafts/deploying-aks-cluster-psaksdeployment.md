@@ -291,15 +291,6 @@ nginx-ingress        1           Mon Jan 28 10:28:41 2019    DEPLOYED    nginx-i
 secret-propagator    1           Mon Jan 28 10:36:32 2019    DEPLOYED    secret-propagator-0.1.0 1.0           default
 ```  
 
-
-
-
-
-
-
-_______________________________________________________________________________________
-
-
 ## Deleting an Azure Kubernetes (AKS) Cluster  
 
 An AKS cluster deployed with `Invoke-PSAksDeployment` may need to be later deprovisioned.
