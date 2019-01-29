@@ -1,9 +1,9 @@
 ---
 title: 'Deploying a production-ready Azure Kubernetes (AKS) cluster with PSAksDeployment'
 tags: [PowerShell, Azure, Kubernetes, Terraform]
-excerpt: 'In this post, we introduce PSAksDeployment: a tool which deploys an AKS cluster to a "ready-to-use" state in a few PowerShell commands. We also peek into how it uses Terraform and Helm under the hood.'
+excerpt: 'In this post, we introduce PSAksDeployment: a tool which deploys an AKS cluster to a "ready-to-use" state in a few PowerShell commands. We also take a peek into how it uses Terraform and Helm under the hood.'
 header:
-  teaser: "https://raw.githubusercontent.com/MathieuBuisson/vsts-PSCodeHealth/master/PSCodeHealth/images/SelectCodeMetrics.png"
+  teaser: "/images/deploying-aks-cluster-psaksdeployment-resourcegroup.png"
 ---
 
 {%- include toc -%}
@@ -21,7 +21,7 @@ Deploying a **production-ready** Kubernetes cluster requires additional componen
   - Routing requests from the outside world to services in the cluster (ingress controller)  
   - Issuing and managing TLS certificates for ingress controller(s)  
 
-So I wrote `PSAksDeployment` to help bridge the gap between a "**Hello World!**" AKS cluster and a cluster on which one can run production apps.
+`PSAksDeployment` aims to bridge the gap between a "**Hello World!**" AKS cluster and a cluster on which we can run production apps.
 
 It is an opinionated implementation, in the sense that :  
   - The monitoring solution is **[Azure Monitor](https://azure.microsoft.com/en-us/services/monitor/)** (with Log Analytics)  
@@ -31,7 +31,7 @@ It is an opinionated implementation, in the sense that :
   - The ingress controller TLS certificate is propagated to other namespaces (including namespaces created at a later point), to allow ingresses in any namespace to use it, using a custom tool : **[secret-propagator](https://github.com/MathieuBuisson/PSAksDeployment/tree/master/PSAksDeployment/Assets/secret-propagator)**  
 
 
-## Installing PSAksDeployment and its Prerequisites  
+## Installing PSAksDeployment  
 
 To use `PSAksDeployment`, you need :  
   - Windows PowerShell 5.1  
@@ -39,7 +39,7 @@ To use `PSAksDeployment`, you need :
 
 This means it is only supported on Windows at this point in time. I may make it work with PowerShell Core if there is a need for it.
 
-`PSAksDeployment` is available on the [PowerShell Gallery](https://www.powershellgallery.com/), so install it is easy as :  
+`PSAksDeployment` is available on the [PowerShell Gallery](https://www.powershellgallery.com/packages/PSAksDeployment/), so installing it is easy as :  
 
 ```powershell
 Install-Module -Name 'PSAksDeployment' -Repository 'PSGallery'
@@ -59,9 +59,10 @@ Install-PSAksPrerequisites -InstallationFolder 'C:\Tools'
 If the specified installation folder is not in the `PATH` environment variable, it also takes care of adding it.
 
 {% capture notice-text %}
-Please be patient, the downloads may take a while.{% endcapture %}
+Be patient, the file downloads may take a while.{% endcapture %}
 
 <div class="notice--warning">
+  <h4>Note :</h4>
   {{ notice-text | markdownify }}
 </div>
 
@@ -246,9 +247,10 @@ Here is what the generated file looks like :
 }
 
 ```  
-(Output cut for brevity)  
+(Output cut for brevity)
+{: .notice--info }  
 
-As we can see above, values are already set in the file when there is a default value, otherwise, it's an empty string.  
+As we can see above, values are already set when there is a default value, otherwise, it's an empty string.  
 We can populate and change the values to our needs, and when the file is ready, we can feed it to `Invoke-PSAksDeployment`, like so :  
 
 ```powershell
@@ -257,14 +259,14 @@ PS C:\> Invoke-PSAksDeployment -ConfigPath '.\my-k8s-prod.psd1'
 
 While the deployment is in progress, there is quite a lot of logging written to the console, some of which will look very familiar to those who use `Terraform`.
 
-The overall deployment duration depends on many variables, some of which we have no control over (those related to the Azure infrastructure/platform).  
+The overall deployment duration depends on many variables, some of which pertain to the Azure infrastructure/platform.  
 That being said, in my experience, it takes between 20 and 40 minutes.
 
 When it completes, we can take a look at the deployed resources in the Azure portal, but what we can see in the resource group (`my-k8s-prod-rg` in this case) is somewhat deceptive :  
 
 ![my-k8s-prod-rg]({{ "/images/deploying-aks-cluster-psaksdeployment-resourcegroup.png" | absolute_url }})  
 
-Azure AKS creates another resource group (`MC_my-k8s-prod-rg_my-k8s-prod_northeurope` in this case), which contains the infrastructure resources associated with the cluster : Kubernetes node VMs, virtual network, load balancer, storage, etc :  
+Azure AKS creates another resource group (`MC_my-k8s-prod-rg_my-k8s-prod_northeurope` in this case), which contains the **infrastructure resources** associated with the cluster : Kubernetes node VMs, virtual network, load balancer, storage, etc :  
 
 ![Infra resource group]({{ "/images/deploying-aks-cluster-psaksdeployment-infra-resourcegroup.png" | absolute_url }})  
 
@@ -298,7 +300,7 @@ An AKS cluster deployed with `Invoke-PSAksDeployment` may need to be later depro
 In this case, the cmdlet `Remove-PSAksDeployment` automates tearing down the Azure Kubernetes Service instance and all associated resources, to stop incurring any Azure charges.  
 
 {% capture notice-delete %}
-This deletes **all** resources in both resource groups : the target resource group and the infrastructure resource group created by AKS.  
+This deletes **all resources in both resource groups** : the target resource group and the infrastructure resource group created by AKS.  
 Keep this in mind, especially if any resource(s) were added outside of `PSAksDeployment`'s purview.{% endcapture %}
 
 <div class="notice--warning">
