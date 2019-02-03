@@ -323,5 +323,55 @@ PS C:\> Remove-PSAksDeployment @DestroyParams
 
 That's pretty much it on how to use `PSAksDeployment`, now let's take a peek under the hood.
 
-## The Underlying Terraform Configurations  
+## Expanding On a Few Terraform Config Sections  
+
+Let's take a look at a few sections of `Terraform` configurations which are worthy of mention/explanation.  
+
+```json
+resource "null_resource" "helm_init" {
+  provisioner "local-exec" {
+    command = "helm init --wait --replicas ${var.tiller_replica_count} --tiller-namespace kube-system --service-account=${kubernetes_service_account.tiller.metadata.0.name}"
+  }
+
+  depends_on = ["kubernetes_cluster_role_binding.tiller"]
+}
+```
+
+This resource is just running a command on the local machine.  
+The purpose of the `helm init` command is to install and configure `tiller` (the server-side component of `Helm`) into the Kubernetes cluster.  
+
+After this command completes, we are ready to use `Helm` against our Kubernetes cluster to deploy components and applications via `Helm` charts.  
+`Helm` charts are essentially packages describing the Kubernetes resources to deploy (pods, services, etc...) and how to deploy them. We actually use `Helm` charts in subsequent steps.  
+
+```json
+resource "helm_release" "nginx_ingress" {
+  name      = "nginx-ingress"
+  chart     = "stable/nginx-ingress"
+  namespace = "${kubernetes_namespace.management.metadata.0.name}"
+
+  # Giving Azure 10min to create a load-balancer and assign the Public IP to it
+  timeout    = "600"
+  depends_on = ["null_resource.helm_init"]
+
+  values = [<<EOF
+  controller:
+    replicaCount: ${var.ingressctrl_replica_count}
+    service:
+      loadBalancerIP: "${var.ingressctrl_ip_address}"
+EOF
+  ]
+}
+```
+
+The `helm_release` Terraform resource allows to deploy `Helm` charts to our Kubernetes cluster.  
+
+Here, the `Helm` chart being deployed is "nginx-ingress".  
+The **NGINX Ingress Controller** is a popular solution to manage access to services running inside the cluster from the outside world.
+
+The `loadBalancerIP` value is interesting :  
+it tells Kubernetes to create a service and expose it externally via a load-balancer. Then, Kubernetes asks the underlying cloud provider (Azure, in this case) to provision a load-balancer and associate it with the specified IP address.  
+
+The value of this IP address comes from a Public IP Azure resource which is created at an earlier step.  
+
+Sometimes, the provisioning of the Azure load-balancer takes more than 5 minutes (the default `Helm` timeout), this is why we set the `timeout` value to `600` (10 minutes).
 
