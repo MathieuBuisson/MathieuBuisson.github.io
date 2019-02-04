@@ -3,13 +3,12 @@ title: 'Deploying a production-ready Azure Kubernetes (AKS) cluster with PSAksDe
 tags: [PowerShell, Azure, Kubernetes, Terraform]
 excerpt: 'In this post, we introduce PSAksDeployment: a tool which deploys an AKS cluster to a "ready-to-use" state in a few PowerShell commands. We also take a peek into how it uses Terraform and Helm under the hood.'
 header:
-  teaser: "/images/deploying-aks-cluster-psaksdeployment-resourcegroup.png"
+  teaser: "/images/2019-02-04-deploying-aks-cluster-psaksdeployment-resourcegroup.png"
 ---
 
 {%- include toc -%}
 
-## Introducing PSAksDeployment  
-
+## Introducing PSAksDeployment
 
 **[Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/)** (AKS) makes provisioning **[Kubernetes](https://kubernetes.io/)** clusters very easy.  
 Unfortunately, the examples we can find out there, be it in official documentation or blog posts, are more "**Hello World!**" than "**real world**".  
@@ -19,7 +18,7 @@ Deploying a **production-ready** Kubernetes cluster requires additional componen
   - [Kubectl](https://kubernetes.io/docs/reference/kubectl) configuration  
   - How to deploy resources ([Helm](https://helm.sh/) and Tiller)  
   - Routing requests from the outside world to services in the cluster (ingress controller)  
-  - Issuing and managing TLS certificates for ingress controller(s)  
+  - Issuing and managing TLS certificates for HTTPS endpoints  
 
 `PSAksDeployment` aims to bridge the gap between a "**Hello World!**" AKS cluster and a cluster on which we can run production apps.
 
@@ -68,7 +67,7 @@ Be patient, the file downloads may take a while.{% endcapture %}
 
 As soon as `Install-PSAksPrerequisites` completes, we can start deploying stuff.  
 
-## Deploying an Azure Kubernetes (AKS) Cluster  
+## Deploying an AKS Cluster  
 
 This is where the command `Invoke-PSAksDeployment` comes in.  
 
@@ -264,11 +263,11 @@ That being said, in my experience, it takes between 20 and 40 minutes.
 
 When it completes, we can take a look at the deployed resources in the Azure portal, but what we can see in the resource group (`my-k8s-prod-rg` in this case) is somewhat deceptive :  
 
-![my-k8s-prod-rg]({{ "/images/deploying-aks-cluster-psaksdeployment-resourcegroup.png" | absolute_url }})  
+![my-k8s-prod-rg]({{ "/images/2019-02-04-deploying-aks-cluster-psaksdeployment-resourcegroup.png" | absolute_url }})  
 
 Azure AKS creates another resource group (`MC_my-k8s-prod-rg_my-k8s-prod_northeurope` in this case), which contains the **infrastructure resources** associated with the cluster : Kubernetes node VMs, virtual network, load balancer, storage, etc :  
 
-![Infra resource group]({{ "/images/deploying-aks-cluster-psaksdeployment-infra-resourcegroup.png" | absolute_url }})  
+![Infra resource group]({{ "/images/2019-02-04-deploying-aks-cluster-psaksdeployment-infra-resourcegroup.png" | absolute_url }})  
 
 Also, the usual **Kubernetes** management tools are ready to work with our new cluster.  
 For example, we can use our trusty `kubectl` to list the deployments in the "management" namespace :  
@@ -293,7 +292,7 @@ nginx-ingress        1           Mon Jan 28 10:28:41 2019    DEPLOYED    nginx-i
 secret-propagator    1           Mon Jan 28 10:36:32 2019    DEPLOYED    secret-propagator-0.1.0 1.0           default
 ```  
 
-## Deleting an Azure Kubernetes (AKS) Cluster  
+## Deleting an AKS Cluster  
 
 An AKS cluster deployed with `Invoke-PSAksDeployment` may need to be later deprovisioned.
 
@@ -321,13 +320,11 @@ PS C:\> $DestroyParams = @{
 PS C:\> Remove-PSAksDeployment @DestroyParams
 ```
 
-That's pretty much it on how to use `PSAksDeployment`, now let's take a peek under the hood.
+## Zooming In On a Few Terraform Resources
 
-## Expanding On a Few Terraform Config Sections  
+Now that we know how to use `PSAksDeployment`, let's take a look at a few sections of `Terraform` configurations which are worthy of mention/explanation.  
 
-Let's take a look at a few sections of `Terraform` configurations which are worthy of mention/explanation.  
-
-```json
+```javascript
 resource "null_resource" "helm_init" {
   provisioner "local-exec" {
     command = "helm init --wait --replicas ${var.tiller_replica_count} --tiller-namespace kube-system --service-account=${kubernetes_service_account.tiller.metadata.0.name}"
@@ -341,15 +338,15 @@ This resource is just running a command on the local machine.
 The purpose of the `helm init` command is to install and configure `tiller` (the server-side component of `Helm`) into the Kubernetes cluster.  
 
 After this command completes, we are ready to use `Helm` against our Kubernetes cluster to deploy components and applications via `Helm` charts.  
-`Helm` charts are essentially packages describing the Kubernetes resources to deploy (pods, services, etc...) and how to deploy them. We actually use `Helm` charts in subsequent steps.  
+`Helm` charts are essentially packages describing Kubernetes resources to deploy (pods, services, etc...) and how to deploy them. We actually use `Helm` charts in subsequent steps.  
 
-```json
+```javascript
 resource "helm_release" "nginx_ingress" {
   name      = "nginx-ingress"
   chart     = "stable/nginx-ingress"
   namespace = "${kubernetes_namespace.management.metadata.0.name}"
 
-  # Giving Azure 10min to create a load-balancer and assign the Public IP to it
+  // Giving Azure 10min to create a load-balancer and assign the Public IP to it
   timeout    = "600"
   depends_on = ["null_resource.helm_init"]
 
@@ -363,15 +360,68 @@ EOF
 }
 ```
 
-The `helm_release` Terraform resource allows to deploy `Helm` charts to our Kubernetes cluster.  
+The `helm_release` Terraform resource allows to deploy `Helm` charts into Kubernetes.  
 
 Here, the `Helm` chart being deployed is "nginx-ingress".  
 The **NGINX Ingress Controller** is a popular solution to manage access to services running inside the cluster from the outside world.
 
 The `loadBalancerIP` value is interesting :  
-it tells Kubernetes to create a service and expose it externally via a load-balancer. Then, Kubernetes asks the underlying cloud provider (Azure, in this case) to provision a load-balancer and associate it with the specified IP address.  
+it tells Kubernetes to create a service and expose it externally via a load-balancer. Then, Kubernetes asks the underlying cloud provider (Azure, in this case) to provision a load-balancer and attach it to the specified IP address.  
 
 The value of this IP address comes from a Public IP Azure resource which is created at an earlier step.  
 
 Sometimes, the provisioning of the Azure load-balancer takes more than 5 minutes (the default `Helm` timeout), this is why we set the `timeout` value to `600` (10 minutes).
 
+```javascript
+resource "helm_release" "cert_manager" {
+  name       = "cert-manager"
+  chart      = "stable/cert-manager"
+  // Since v0.6.0, cert-manager Helm chart doesn't provide
+  // a good way of installing the cert-manager CRDs
+  version    = "v0.5.2"
+  namespace  = "${kubernetes_namespace.management.metadata.0.name}"
+  timeout    = "540"
+  depends_on = ["helm_release.nginx_ingress"]
+
+  values = [<<EOF
+  ingressShim:
+    defaultIssuerName: letsencrypt-${var.letsencrypt_environment}
+    defaultIssuerKind: ClusterIssuer
+EOF
+  ]
+}
+```
+
+This time, we deploy the **cert-manager** `Helm` chart.  
+**[Cert-manager](https://github.com/jetstack/cert-manager)** is a very cool tool which automates the issuance and renewal of TLS certificates needed by HTTPS-based services. The resulting certificates are ultimately stored in Kubernetes as **secret** resources.
+
+**cert-manager** extends Kubernetes with custom resources, like : Certificate, Issuer, etc...  
+These **CustomResourceDefinition** (CRDs) are not shipped with the `Helm` chart anymore, which means we need to apply a separate YAML manifest prior to using **cert-manager** `Helm` chart. Besides, the URL of this manifest varies based on the **cert-manager** version.  
+
+So as a (hopefully temporary) workaround, we pin the **cert-manager** `Helm` chart version to the latest one which ships with the CRDs.
+
+```javascript
+resource "helm_release" "cluster_issuer" {
+  name       = "cluster-issuer"
+  chart      = "..\\..\\Assets\\cluster-issuer"
+  depends_on = ["helm_release.cert_manager"]
+
+  values = [<<EOF
+  email: ${var.letsencrypt_email_address}
+  environment: ${var.letsencrypt_environment}
+EOF
+  ]
+}
+```
+
+Again, we deploy a `Helm` chart, but this time we are not pulling the chart from the stable repository but from a local directory.  
+This is a custom chart to create a cluster-wide issuer resource for **cert-manager**.
+
+**cert-manager** can talk to different certificate authorities, but in this case, we configure it to talk to **Let's Encrypt**. **[Let's Encrypt](https://letsencrypt.org/)** is easy to use, free, and suitable for production certificates.
+
+The caveat to that is :  
+**Let's Encrypt** certificates are only valid for 90 days, but this is not a problem here, because **cert-manager** takes care of renewing them automatically.  
+
+That's pretty much it for now.  
+For more information about `PSAksDeployment` and a dive into the code, head over to **[the project on GitHub](https://github.com/MathieuBuisson/PSAksDeployment)**.  
+If you have any question, remark, issue, or feature request, feel free to open an issue.
