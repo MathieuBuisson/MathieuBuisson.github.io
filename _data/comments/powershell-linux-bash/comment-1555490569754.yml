@@ -1,0 +1,7 @@
+_id: c7c62230-60ec-11e9-adf0-19362926875a
+message: "I've just been thrown in the deep end, from administering a bunch of Macs that are being replaced by windows machines and I have to re-write all the Applescript, and shell script workflows.  (I hope they don't want me to re-write my applications too)\r\n\r\nSo I saw your find replacement and though ok I should be able to do this;\r\nthis is a command I run frequently to find largest files on disk;\r\nfind . -ls | sort -k 7 -n \r\nso I tried\r\nget-childitem -Recurse | sort length\r\nwhich didn't give me the same response, it sorted files per each directory.\r\n\r\nSo although your site it useful, you've only given me a fish. how do I \"fish\" and find out the correct answer?\r\n\r\nCheers"
+name: Mark
+email: 572545beeea1862906ebaa9f4326773c
+url: ''
+hidden: ''
+date: '2019-04-17T08:42:49.753Z'
