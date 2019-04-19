@@ -1,0 +1,7 @@
+_id: b2914080-62e4-11e9-90dd-2bb86faa0019
+message: "(correction from last entry - \"file\" was missing in the second line)\r\n\r\ncat file | wc -l\r\n\r\ntype file | Measure-Object -line"
+name: Thor
+email: 0e2883cad380c9755264b3b4f1052d35
+url: ''
+hidden: ''
+date: '2019-04-19T20:50:00.431Z'
