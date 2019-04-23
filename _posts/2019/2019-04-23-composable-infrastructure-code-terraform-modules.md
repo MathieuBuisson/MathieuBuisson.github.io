@@ -263,7 +263,14 @@ When we are done splitting our **Infrastructure as Code** template into smaller,
 
 To that end, we write a **Terraform** configuration which calls the modules and combines them together by accessing their outputs and passing them to other module's parameters as needed.  
 
-As alluded to earlier, this **Terraform** configuration can also be called a *"root module"*. This is not really different, since a module is just a directory with a bunch of `.tf` files.  
+{% capture notice-root-text %}
+As alluded to earlier, this **Terraform** configuration can also be called a *"root module"*. This is not really different, since a module is just a directory with a bunch of `.tf` files.
+{% endcapture %}
+
+<div class="notice--info">
+  <h4>Note :</h4>
+  {{ notice-root-text | markdownify }}
+</div>
 
 In our case, this refers to the `.tf` files located at the root of the repository :  
 
