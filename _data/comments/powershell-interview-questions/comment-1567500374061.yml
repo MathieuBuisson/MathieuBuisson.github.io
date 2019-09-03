@@ -1,0 +1,7 @@
+_id: 48f409b0-ce27-11e9-a4ef-87146b68ccad
+message: "@Jeremy Pack\r\n\"FYI: The constructor for [IP Address] accepts [in64] So [ipaddress]”1” is valid (IP address 0.0.0.1) as is [ipaddress]1 or even [ipaddress]0 & [ipaddress]$null\"\r\n\r\nI think Don was referring to [System.Net.IPAddress]::TryParse($String, [ref]$Result)"
+name: James Lear
+email: 96631a11b191b19e56902ca8a76ef5c1
+url: ''
+hidden: ''
+date: '2019-09-03T08:46:14.060Z'
