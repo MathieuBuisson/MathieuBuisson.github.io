@@ -1,9 +1,9 @@
 ---
 title: 'Using Azure Monitor Workbooks to document your Azure resources'
 tags: [Azure]
-excerpt: 'In this post, we show how to build an Azure resources inventory report, which is reusable for any Resource Group. Then, we share the workbook to make it available to colleagues and other stakeholders.'
+excerpt: 'In this post, we demonstrate how to build a self-updating inventory of Azure resources in any Resource Group, across multiple subscriptions. Then, we share the workbook to make it available to colleagues and other stakeholders.'
 header:
-    teaser:
+    teaser: '/images/2020-01-03-azure-workbooks-inventory-resources-vms-table.png'
 ---
 
 {%- include toc -%}
@@ -26,7 +26,7 @@ An aspect of Azure governance which is often overlooked is :
 > What is the type, configuration, SKU of these resources ?
 
 In other words, how do we build and document an **inventory of Azure resources** ?  
-Sure, this can be done in a Confluence page or any kind of wiki, but as resources and entire environments are being created, modified, deleted by different teams and processes, how can we keep this documentation up-to-date ?
+Sure, this can be done in a Confluence page or any kind of wiki, but as resources and environments are created, modified, deleted by different teams and processes, how can we keep this documentation up-to-date ?
 
 Any document which relies on human intervention is unlikely to keep up with the rate and variety of change, and it will eventually become stale.
 
@@ -51,8 +51,6 @@ This workbook will enable us to gather a few relevant properties on the followin
 -   App Services
 -   SQL Databases
 -   Virtual Machines
--   Automation Runbooks
--   Redis Cache
 
 Let's do this.
 
@@ -62,7 +60,7 @@ Let's do this.
 2. In the **Monitor** menu click on **Workbooks**
 3. From here, we can view the built-in templates, but in our case, we select **Empty** :
 
-    ![Empty]({{ "/images/2020-01-02-azure-workbooks-inventory-resources-empty.png" | absolute_url }})
+    ![Empty]({{ "/images/2020-01-03-azure-workbooks-inventory-resources-empty.png" | absolute_url }})
 
 We add an introductory section for the report, just to have some content to save.
 
@@ -98,7 +96,7 @@ Now, we save the report as a **workbook** resource.
 
     Now, if we go to the destination resource group, we can see the corresponding resource :
 
-    ![Workbook resource]({{ "/images/2020-01-02-azure-workbooks-inventory-resources-resource.png" | absolute_url }})
+    ![Workbook resource]({{ "/images/2020-01-03-azure-workbooks-inventory-resources-resource.png" | absolute_url }})
 
     **Note:**  
     Clicking on this resource merely provides access to the resource metadata.  
@@ -108,14 +106,14 @@ Now, we save the report as a **workbook** resource.
 4. In the Azure Portal, go back to the **Monitor** service
 5. You should see the saved workbook in **Recently modified workbooks** :
 
-    ![Recently modified]({{ "/images/2020-01-02-azure-workbooks-inventory-resources-recently.png" | absolute_url }})
+    ![Recently modified]({{ "/images/2020-01-03-azure-workbooks-inventory-resources-recently.png" | absolute_url }})
 
 6. Click on the saved workbook to open it
 7. Click on the **Edit** button to switch to editing mode
 
 Next, we are going to flesh out our Azure resources inventory report.
 
-## Building the Report
+## Building the Azure Resources Inventory Report
 
 In our scenario, Azure environments have a 1-to-1 relationship with a resource group and these resource groups follow a basic naming convention :  
 `{Environment_Type}-corp-{Environment_Location}`
@@ -126,29 +124,29 @@ For example, the resource groups names are :
 -   dev-corp-us
 -   test-corp-us
 
-In the workbook, we want the user to be able to interactively choose which environment to inventory.  
-We can do that using a parameter.
+In the workbook, we want the user to be able to interactively choose which environment to look at.  
+We can achieve this with a parameter.
 
 ### Parameterizing the Report
 
 1. Click on **Add parameters**
 2. Click on **Add parameter** on the top left corner on the section editing box
-3. Specifiy the parameter properties like so :
+3. Specify the parameter properties like so :
 
-    ![Parameter]({{ "/images/2020-01-02-azure-workbooks-inventory-resources-parameter.png" | absolute_url }})
+    ![Parameter]({{ "/images/2020-01-03-azure-workbooks-inventory-resources-parameter.png" | absolute_url }})
 
     Some of these fields warrant an explanation.
 
     - **Parameter type** : The type of UI to allow the user to specify a value for this parameter.
       In this case, we want a drop down menu.
     - **Get data from** : Where the possible values in the drop down menu should come from.  
-      This can be static data ( a JSON array), or dynamic data (based on a <abbr title="Kusto Query Language">KQL</abbr> query).  
+      This can be static data (a JSON array), or dynamic data (based on a <abbr title="Kusto Query Language">KQL</abbr> query).  
       In this case, it is based on a query, since we are going to query the **Azure Resource Graph** to get a list of resource groups.
     - **Data source** : Azure Resource Graph
     - **Subscriptions** : Use all subscriptions, unless you want to restrict this query to specific subscriptions.
 
         **Warning:**  
-         All <abbr title="Kusto Query Language">KQL</abbr> queries in a workbook run whenever we interact with the workbook.  
+         All <abbr title="Kusto Query Language">KQL</abbr> queries in a workbook are executed whenever we interact with the workbook.  
          They are run under the credentials of whoever is viewing the workbook, so they return only resource groups and resources that the user has access to (at least **Read** permission).
         {: .notice--warning }
 
@@ -167,9 +165,9 @@ We can do that using a parameter.
 
 Now, we can test the UI for this parameter :
 
-![dropdown]({{ "/images/2020-01-02-azure-workbooks-inventory-resources-dropdown.png" | absolute_url }})
+![dropdown]({{ "/images/2020-01-03-azure-workbooks-inventory-resources-dropdown.png" | absolute_url }})
 
-### Adding a Section for App Services
+### Adding a Section for App Services Inventory
 
 We start off with a short text block, containing the section title and a bit of usage information.
 
@@ -184,7 +182,7 @@ We start off with a short text block, containing the section title and a bit of 
 
 3. Click on **Done Editing**
 
-Now, we gather the data we need regarding the Azure App Services (in the selected resource group) and present the data in a table.
+Now, we gather the data we need regarding the Azure App Services (in the resource group specified via the `ResourceGroupeName` parameter) and present the data in a table.
 
 1. Click on **Add query**
 2. Change the **Data source** to **Azure Resource Graph**
@@ -216,21 +214,21 @@ Now, we gather the data we need regarding the Azure App Services (in the selecte
 
     We can now admire the result of our query :
 
-    ![App Services Table]({{ "/images/2020-01-02-azure-workbooks-inventory-resources-appservices-table.png" | absolute_url }})
+    ![App Services Table]({{ "/images/2020-01-03-azure-workbooks-inventory-resources-appservices-table.png" | absolute_url }})
 
     Note that values in the **Web App** and **App Service Plan** columns are automatically displayed as links and clicking on any of these brings us to the underlying resource in the Azure Portal.  
     Unfortunately, this is not the case for the **URL** column. But we can easily remediate that.
 
 7. Click the **Edit** button at the bottom right of the App Service table
 8. Click on **Column Settings**
-9. Select the **URL (Automatic)**
+9. Select **URL (Automatic)**
 10. Set **Column renderer** to **Link**
 11. Set **View to open** to **Url**
 12. Click **Save and Close**
 
 Now, we can browse to the actual application by clicking on its URL value in the table.
 
-### Adding a Section for SQL Databases
+### Adding a Section for SQL Databases Inventory
 
 We start off with a short text block, containing the section title and a bit of usage information.
 
@@ -245,13 +243,13 @@ We start off with a short text block, containing the section title and a bit of 
 
 3. Click on **Done Editing**
 
-Now, we gather the data we need regarding the Azure SQL Databases (in the selected resource group) and present the data in a table.
+Now, we gather the Azure SQL Databases information (from the specified resource group) and present it in a table.
 
 1. Click on **Add query**
 2. Change the **Data source** to **Azure Resource Graph**
 3. For **Subscriptions**, select **Use all Subscriptions**
 4. Leave **Visualization** at its default value
-5. Set **Size** to **Small**, unless you have about 6 or more databases
+5. Set **Size** to **Small**, unless you have about 6 or more databases per environment
 6. In the query text box, add the following query :
 
     ```
@@ -275,8 +273,119 @@ Now, we gather the data we need regarding the Azure SQL Databases (in the select
 
 The resulting table might not look as cute as Baby Yoda, but still looks pretty nice :
 
-![SQL Databases]({{ "/images/2020-01-02-azure-workbooks-inventory-resources-databases-table.png" | absolute_url }})
+![SQL Databases table]({{ "/images/2020-01-03-azure-workbooks-inventory-resources-databases-table.png" | absolute_url }})
 
 Again, the **Database** and **Elastic Pool** columns allow us to browse to the underlying resource in the portal, since their values are displayed as links.
 
-### Adding a Section for Virtual Machines
+### Adding a Section for Virtual Machines Inventory
+
+We start off with a short text block, containing the section title and a bit of usage information.
+
+1. Click on **Add text**
+2. Add the following markdown :
+
+    ```md
+    ## Virtual Machines :
+
+    💡 _Click on a Virtual Machine name to go to the resource in the portal_
+    ```
+
+3. Click on **Done Editing**
+
+Now, we gather the data relevant to Virtual Machines (in the specified resource group/environment) and present it in a table.
+
+1. Click on **Add query**
+2. Change the **Data source** to **Azure Resource Graph**
+3. For **Subscriptions**, select **Use all Subscriptions**
+4. Leave **Visualization** at its default value
+5. Set **Size** to **Small**, unless you have about 6 or more VMs per environment
+6. In the query text box, add the following query :
+
+    ```
+    Resources
+    | where resourceGroup == '{ResourceGroupeName}'
+    | where type == 'microsoft.compute/virtualmachines'
+    | project Name = id,
+      Size = properties.hardwareProfile.vmSize,
+      ["OS Image"] = strcat(properties.storageProfile.imageReference.offer, " - ", properties.storageProfile.imageReference.sku),
+      associated_nic = extract(".*/(.*)\"}$", 1, tostring(properties.networkProfile.networkInterfaces[0]))
+    | join kind = leftouter (
+      Resources
+      | where resourceGroup == '{ResourceGroupeName}'
+      | where type == 'microsoft.network/publicipaddresses'
+      | project ["Public IP Address"] = properties.ipAddress,
+        associated_nic = extract(".*/networkInterfaces/(.*?)/.*", 1, tostring(properties.ipConfiguration.id))
+      ) on associated_nic
+    | project-away associated_nic, associated_nic1
+    ```
+
+    In this section we are interested in **Virtual Machines**, so we filter on the type `microsoft.compute/virtualmachines`.
+
+    Then, we use `project` to define the table's columns.  
+    For the **OS Image** column, we use `strcat()` to construct a user-friendly OS image name, based on the image `offer` and `sku` properties.
+
+    Also, for VMs which have a public IP address, we want to show that IP address in a **Public IP Address** column.  
+    Sadly, the Virtual Machine object returned by the query doesn't contain any reference to the Public IP, so we need to run another query specifically for **Public IP addresses** and then `join` its results with the **Virtual Machines** query.
+
+    In the **Virtual Machines** query, we use the `networkInterfaces` nested property to get the first NIC. This is safe in this case, because we know that our VMs only have 1 NIC.  
+    Then, we use a regex to `extract()` the name of the network interface.
+
+    So, the **Public IP addresses** query needs to have 2 columns :
+
+    - 1 column containing the information we ultimately want : **the Public IP address**
+    - 1 column that we can `join` on : **the name of the network interface**
+
+    We use the `ipConfiguration` nested property to get the resource ID of the network interface which is associated with the Public IP.  
+    Then, we use a regex to `extract()` the name of the network interface.
+
+    Now, we have 2 queries which have a column in common (same name : `associated_nic` and same value), so we can join these 2 queries on this column.  
+    Note that this is a **left outer join** because our left query (**Virtual Machines** query) is the main one : we keep the Virtual Machine data even if there is no match in the **Public IP addresses** query.
+
+7. Click **Done Editing**
+
+Here is what the VMs table looks like :
+
+![Virtual Machines table]({{ "/images/2020-01-03-azure-workbooks-inventory-resources-vms-table.png" | absolute_url }})
+
+Again, clicking on a VM name brings us to the underlying resource in the Azure Portal.
+
+We can add more sections to inventory other types of resources : Azure Storage accounts, Virtual Networks and subnets, Automation runbooks, the list goes on...  
+At this point, we have a fairly good grasp of the basic building blocks :
+
+-   Markdown blocks to add structure and any additional information to the report
+-   Azure Resource Graph queries to get and present data about our Azure resources
+
+So let's consider our workbook done and save it.
+
+1. Click on the **Done Editing** button at the top of the screen
+2. Click the **Save** button
+
+## Sharing the Azure Resources Inventory Report
+
+We have 2 options to share the report with others users and stakeholders :
+
+-   Pinning some (or all) of the sections to an Azure Portal dashboard
+-   Sharing a link to the workbook
+
+To pin all sections of the workbook to a dashboard :
+
+1. Click the **Edit** button at the top of the workbook
+2. Click the **Pin** button
+3. Click the **Pin All** button
+4. Click the **Done Pinning** button
+
+To share the link to the workbook :
+
+1. Click the **Share** button at the top of the workbook
+2. Below the **Link to share** field, click the **Copy** button
+3. Send the copied URL to any users who may be interested in viewing this report.  
+   It is a crazy long URL, so you might want to use a URL shortener service and share the shortened URL instead.
+
+That's it, we now have an inventory report of our Azure resources for multiple environments, across all subscriptions.  
+**This report is interactive** : the user can choose which environment/resource group to look at, and sort the data on any table's column.
+More importantly, the report **will always be up-to-date** since the queries to get the data are executed whenever we view the report.
+
+Off course, this was just a fairly simple example, the report can be added to and customized at will.  
+With just 2 types of building blocks (markdown and <abbr title="Kusto Query Language">KQL</abbr> queries), the possibilities are almost endless.
+
+To learn more on data sources, visualization types and capabilities offered by **Azure Monitor Workbooks**, please refer to the excellent **[documentation](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/workbooks-overview)**.
