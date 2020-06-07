@@ -1,0 +1,7 @@
+_id: 8443b1b0-a8b4-11ea-991d-ff3431defb0d
+message: "Hi, great blog! Did you find a way to list all resources with CREATEDATE ? For a \"cmdb/inventory\" it would be essential to get the date of creation for each resource but unfortunately this is not possible with resource graph? You can query the properties.creationTime ... but seems only be filled for type==storageaccoutns and not other types \r\nKQL:\r\nresources\r\n| project subscriptionId,name, type,properties.creationTime , properties"
+name: Jochen
+email: 1256fa39102eb71da6572db186f28947
+url: ''
+hidden: ''
+date: '2020-06-07T11:46:25.885Z'
