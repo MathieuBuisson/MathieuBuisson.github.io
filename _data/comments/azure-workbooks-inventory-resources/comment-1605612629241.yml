@@ -1,0 +1,7 @@
+_id: 4b691440-28c8-11eb-8776-2d4ddc34ce40
+message: "Hi Mathieu,\r\nI have a problem with a kusto query for the Azure Resource Graph Explorer. Please do you have an idea to change my query.\r\nThis query list all tags \"isolkuerzel\" in a table. This query works perfect:\r\n\r\nResources\r\n| extend isolKuerzel = tostring(tags.isolKuerzel)\r\n| project isolKuerzel\r\n| distinct isolKuerzel\r\n\r\nNow I must change the filter from isolKuerzel to \"service owner\". But with my format it doesn't work. Can you help my what the right format for that query\r\n\r\nResources\r\n| extend \"service owner\" = tostring(tags.\"service owner\")\r\n| project \"service owner\"\r\n| distinct \"service owner\"\r\n\r\nmany thanks"
+name: Manuel
+email: 183be31d89a7f0e3875157976fc9d57b
+url: ''
+hidden: ''
+date: '2020-11-17T11:30:29.240Z'
